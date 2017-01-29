@@ -1,8 +1,8 @@
 package geometry
 
 import (
-	"math"
 	"fmt"
+	"math"
 )
 
 type Point struct {
