@@ -4,6 +4,8 @@ import (
     "fmt"
     "github.com/tailored-style/pattern-generator/geometry"
     "github.com/tailored-style/pattern-generator/patterns"
+    "github.com/yofu/dxf"
+    "log"
 )
 
 func main() {
@@ -54,7 +56,7 @@ func main() {
 
     fmt.Println()
 
-    fmt.Println("AUTOCAD")
+    fmt.Println("AUTOCAD LISP")
     fmt.Println("--- BEGIN ---")
 
     //fmt.Println("(setq oldosmode (getvar 'osmode))")
@@ -66,6 +68,23 @@ func main() {
 
     //fmt.Println("(setvar 'osmode oldosmode)")
     fmt.Println("--- END ---")
+
+    fmt.Println("Generating DXF...")
+    d := dxf.NewDrawing()
+    d.Header().LtScale = 100.0
+    d.AddLayer("Main", dxf.DefaultColor, dxf.DefaultLineType, true)
+
+    for _, line := range lines {
+        err := line.DrawDXF(d)
+        if err != nil {
+            log.Println(err.Error())
+        }
+    }
+
+    err := d.SaveAs("/Users/toby/sandbox/test-out.dxf")
+    if err != nil {
+        panic(err.Error())
+    }
 }
 
 func printPlots(plots map[string]geometry.Point) {

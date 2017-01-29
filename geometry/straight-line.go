@@ -1,6 +1,9 @@
 package geometry
 
-import "fmt"
+import (
+    "fmt"
+    "github.com/yofu/dxf/drawing"
+)
 
 type StraightLine struct {
     Start *Point
@@ -21,6 +24,12 @@ func (l *StraightLine) ToEnglish() string {
 
 func (l *StraightLine) ToAutoCAD() string {
     return fmt.Sprintf("(command \"LINE\" \"%.1f,%.1f\" \"%.1f,%.1f\" \"\")\n", l.Start.X, l.Start.Y, l.End.X, l.End.Y)
+}
+
+func (l *StraightLine) DrawDXF(d *drawing.Drawing) error {
+    _, err := d.Line(l.Start.X, l.Start.Y, 0.0, l.End.X, l.End.Y, 0.0)
+
+    return err
 }
 
 
