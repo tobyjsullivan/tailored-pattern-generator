@@ -1,0 +1,79 @@
+{
+	"comment": "",
+	"ignore": "",
+	"package": [
+		{
+			"checksumSHA1": "IVTDCB3C0whaxB5CD+bQTkzhLB4=",
+			"path": "github.com/yofu/dxf",
+			"revision": "848dad84d924792d83b28eb7988af47071f3cf3c",
+			"revisionTime": "2016-03-18T06:09:42Z"
+		},
+		{
+			"checksumSHA1": "OAyVSQm0sofGhRIQxqbW4EVE+6Q=",
+			"path": "github.com/yofu/dxf/block",
+			"revision": "848dad84d924792d83b28eb7988af47071f3cf3c",
+			"revisionTime": "2016-03-18T06:09:42Z"
+		},
+		{
+			"checksumSHA1": "/Kjv7HRrNCH/kLTzn7ulWsW0WTU=",
+			"path": "github.com/yofu/dxf/class",
+			"revision": "848dad84d924792d83b28eb7988af47071f3cf3c",
+			"revisionTime": "2016-03-18T06:09:42Z"
+		},
+		{
+			"checksumSHA1": "2YNy6WpGveZzrptM+AwahVY9B/c=",
+			"path": "github.com/yofu/dxf/color",
+			"revision": "848dad84d924792d83b28eb7988af47071f3cf3c",
+			"revisionTime": "2016-03-18T06:09:42Z"
+		},
+		{
+			"checksumSHA1": "uxRmCsJY79Jke1gHbmTRc2oMmO0=",
+			"path": "github.com/yofu/dxf/drawing",
+			"revision": "848dad84d924792d83b28eb7988af47071f3cf3c",
+			"revisionTime": "2016-03-18T06:09:42Z"
+		},
+		{
+			"checksumSHA1": "uX5aL3vnrg1qE6tNpideXtuaP5E=",
+			"path": "github.com/yofu/dxf/entity",
+			"revision": "848dad84d924792d83b28eb7988af47071f3cf3c",
+			"revisionTime": "2016-03-18T06:09:42Z"
+		},
+		{
+			"checksumSHA1": "Fu7R8Em+GFTBEzyt5xp6Vd50CUY=",
+			"path": "github.com/yofu/dxf/format",
+			"revision": "848dad84d924792d83b28eb7988af47071f3cf3c",
+			"revisionTime": "2016-03-18T06:09:42Z"
+		},
+		{
+			"checksumSHA1": "xQ1aBJtEQlcCGl2pO+Oh+4aRHbo=",
+			"path": "github.com/yofu/dxf/geometry",
+			"revision": "848dad84d924792d83b28eb7988af47071f3cf3c",
+			"revisionTime": "2016-03-18T06:09:42Z"
+		},
+		{
+			"checksumSHA1": "en58Ih/mqgBuQB3zBGsK09zj/J4=",
+			"path": "github.com/yofu/dxf/handle",
+			"revision": "848dad84d924792d83b28eb7988af47071f3cf3c",
+			"revisionTime": "2016-03-18T06:09:42Z"
+		},
+		{
+			"checksumSHA1": "VSW02LZ974vHEJSr2KQZ1pd12jE=",
+			"path": "github.com/yofu/dxf/header",
+			"revision": "848dad84d924792d83b28eb7988af47071f3cf3c",
+			"revisionTime": "2016-03-18T06:09:42Z"
+		},
+		{
+			"checksumSHA1": "nNfbJHkpFZu4rBpD+Swm1fmkBv4=",
+			"path": "github.com/yofu/dxf/object",
+			"revision": "848dad84d924792d83b28eb7988af47071f3cf3c",
+			"revisionTime": "2016-03-18T06:09:42Z"
+		},
+		{
+			"checksumSHA1": "PbzVVrDRX9m35HKnQ32us9Ho1No=",
+			"path": "github.com/yofu/dxf/table",
+			"revision": "848dad84d924792d83b28eb7988af47071f3cf3c",
+			"revisionTime": "2016-03-18T06:09:42Z"
+		}
+	],
+	"rootPath": "github.com/tailored-style/pattern-generator"
+}
