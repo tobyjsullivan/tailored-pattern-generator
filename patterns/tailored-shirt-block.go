@@ -8,13 +8,13 @@ import (
 )
 
 type tailoredShirtBlock struct {
-    points map[string]geometry.Point
+    points map[string]*geometry.Point
 }
 
 func NewTailoredShirtBlock(neck float64, chest float64, scyeDepth float64, naturalWaistLength float64, halfBack float64, shirtLength float64) Pattern {
-    p := make(map[string]geometry.Point)
+    p := make(map[string]*geometry.Point)
 
-    p["0"] = geometry.Point{
+    p["0"] = &geometry.Point{
         X: 0,
         Y: 0,
     }
@@ -130,8 +130,8 @@ func NewTailoredShirtBlock(neck float64, chest float64, scyeDepth float64, natur
     p["39"] = p["38"].DrawDown(thirtyEightToThirtyNine)
     p["40"] = p["39"].SquareToHorizontalLine(waistline - 2.5)
 
-    fourtyToFourtyOne := 16.0
-    p["41"] = p["40"].DrawDown(fourtyToFourtyOne)
+    fortyToFortyOne := 16.0
+    p["41"] = p["40"].DrawDown(fortyToFortyOne)
 
     return &tailoredShirtBlock{
         points: p,
@@ -142,7 +142,7 @@ func (p *tailoredShirtBlock) GetPoints() map[string]geometry.Point {
     newMap := make(map[string]geometry.Point)
 
     for key, val := range p.points {
-        newMap[key] = val
+        newMap[key] = *val
     }
 
     return newMap
@@ -201,4 +201,121 @@ func (p *tailoredShirtBlock) inst(w io.Writer, start string, end string, additio
         fmt.Fprintf(w, "; %v", additional)
     }
     fmt.Fprintln(w, ".")
+}
+
+func (p *tailoredShirtBlock) GetLines() []geometry.Line {
+    lines := []geometry.Line{}
+
+    lines = append(lines, &geometry.StraightLine{
+        Start: p.points["0"],
+        End : p.points["9"],
+    })
+
+    lines = append(lines, &geometry.CurvedLine{
+        Start: p.points["0"],
+        End : p.points["8"],
+    })
+
+    lines = append(lines, &geometry.StraightLine{
+        Start: p.points["8"],
+        End : p.points["14"],
+    })
+
+    lines = append(lines, &geometry.CurvedLine{
+        Start: p.points["14"],
+        End : p.points["10"],
+    })
+
+    lines = append(lines, &geometry.StraightLine{
+        Start: p.points["10"],
+        End : p.points["9"],
+    })
+
+    lines = append(lines, &geometry.StraightLine{
+        Start: p.points["9"],
+        End : p.points["3"],
+    })
+
+    lines = append(lines, &geometry.StraightLine{
+        Start: p.points["3"],
+        End : p.points["37"],
+    })
+
+    lines = append(lines, &geometry.CurvedLine{
+        Start: p.points["37"],
+        End : p.points["34"],
+    })
+
+    lines = append(lines, &geometry.CurvedLine{
+        Start: p.points["34"],
+        End : p.points["31"],
+    })
+
+    lines = append(lines, &geometry.CurvedLine{
+        Start: p.points["31"],
+        End : p.points["17"],
+    })
+
+    lines = append(lines, &geometry.CurvedLine{
+        Start: p.points["16"],
+        End : p.points["17"],
+    })
+
+    lines = append(lines, &geometry.CurvedLine{
+        Start: p.points["15"],
+        End : p.points["16"],
+    })
+
+    lines = append(lines, &geometry.StraightLine{
+        Start: p.points["9"],
+        End : p.points["15"],
+    })
+
+    bottomRight := &geometry.Point{X: p.points["29"].X, Y: p.points["36"].Y}
+    lines = append(lines, &geometry.StraightLine{
+        Start: p.points["29"],
+        End : bottomRight,
+    })
+
+    lines = append(lines, &geometry.StraightLine{
+        Start: bottomRight,
+        End : p.points["36"],
+    })
+
+    lines = append(lines, &geometry.CurvedLine{
+        Start: p.points["36"],
+        End : p.points["33"],
+    })
+
+    lines = append(lines, &geometry.CurvedLine{
+        Start: p.points["33"],
+        End : p.points["30"],
+    })
+
+    lines = append(lines, &geometry.CurvedLine{
+        Start: p.points["30"],
+        End : p.points["17"],
+    })
+
+    lines = append(lines, &geometry.CurvedLine{
+        Start: p.points["17"],
+        End : p.points["24"],
+    })
+
+    lines = append(lines, &geometry.StraightLine{
+        Start: p.points["24"],
+        End : p.points["21"],
+    })
+
+    lines = append(lines, &geometry.CurvedLine{
+        Start: p.points["21"],
+        End : p.points["22"],
+    })
+
+    lines = append(lines, &geometry.StraightLine{
+        Start: p.points["22"],
+        End : p.points["29"],
+    })
+
+    return lines
 }

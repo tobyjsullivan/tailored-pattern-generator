@@ -4,7 +4,6 @@ import (
     "fmt"
     "github.com/tailored-style/pattern-generator/geometry"
     "github.com/tailored-style/pattern-generator/patterns"
-    "bytes"
 )
 
 func main() {
@@ -39,16 +38,34 @@ func main() {
         shirtLength,
     )
 
-    w := new(bytes.Buffer)
-	block.PrintInstructions(w)
-    fmt.Println(w.String())
+    //w := new(bytes.Buffer)
+	//block.PrintInstructions(w)
+    //fmt.Println(w.String())
 
-    fmt.Println()
+    //fmt.Println()
 
     fmt.Println("PLOTTING")
     printPlots(block.GetPoints())
 
+    lines := block.GetLines()
+    for _, line := range lines {
+        fmt.Printf(line.ToEnglish())
+    }
+
     fmt.Println()
+
+    fmt.Println("AUTOCAD")
+    fmt.Println("--- BEGIN ---")
+
+    //fmt.Println("(setq oldosmode (getvar 'osmode))")
+    //fmt.Println("(setvar 'osmode (boole 4 1 oldosmode))")
+
+    for _, line := range lines {
+        fmt.Printf(line.ToAutoCAD())
+    }
+
+    //fmt.Println("(setvar 'osmode oldosmode)")
+    fmt.Println("--- END ---")
 }
 
 func printPlots(plots map[string]geometry.Point) {

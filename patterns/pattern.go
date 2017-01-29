@@ -7,5 +7,6 @@ import (
 
 type Pattern interface {
     GetPoints() map[string]geometry.Point
+    GetLines() []geometry.Line
     PrintInstructions(io.Writer)
 }
