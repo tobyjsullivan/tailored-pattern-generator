@@ -1,12 +1,11 @@
 package patterns
 
 import (
-	"github.com/tailored-style/pattern-generator/geometry"
+	"github.com/yofu/dxf/drawing"
 	"io"
 )
 
 type Pattern interface {
-	GetPoints() map[string]geometry.Point
-	GetLines() []geometry.Line
 	PrintInstructions(io.Writer)
+	DrawDXF(*drawing.Drawing) error
 }

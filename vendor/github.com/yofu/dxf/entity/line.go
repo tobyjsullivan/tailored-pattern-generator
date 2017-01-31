@@ -69,7 +69,7 @@ func (l *Line) BBox() ([]float64, []float64) {
 func (l *Line) Length() float64 {
 	sum := 0.0
 	for i := 0; i < 3; i++ {
-		sum += math.Pow(l.End[i] - l.Start[i], 2.0)
+		sum += math.Pow(l.End[i]-l.Start[i], 2.0)
 	}
 	return math.Sqrt(sum)
 }

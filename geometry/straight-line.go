@@ -28,6 +28,7 @@ func (l *StraightLine) ToAutoCAD() string {
 
 func (l *StraightLine) DrawDXF(d *drawing.Drawing) error {
 	_, err := d.Line(l.Start.X, l.Start.Y, 0.0, l.End.X, l.End.Y, 0.0)
+	//var err error = nil
 
 	return err
 }
