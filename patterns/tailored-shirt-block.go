@@ -353,3 +353,6 @@ func (p *tailoredShirtBlock) GetGrainLines() []geometry.Line {
 	return grainLines
 }
 
+func (p *tailoredShirtBlock) GetLabels() []geometry.Drawable {
+	return []geometry.Drawable{}
+}

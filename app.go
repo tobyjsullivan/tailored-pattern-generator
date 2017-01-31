@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/tailored-style/pattern-generator/patterns"
-	"github.com/yofu/dxf"
+	"github.com/tobyjsullivan/dxf"
 )
 
 func main() {

@@ -1,7 +1,7 @@
 package geometry
 
 import (
-	"github.com/yofu/dxf/drawing"
+	"github.com/tobyjsullivan/dxf/drawing"
 	"math"
 )
 

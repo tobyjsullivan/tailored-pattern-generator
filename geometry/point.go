@@ -3,7 +3,7 @@ package geometry
 import (
 	"fmt"
 	"math"
-	"github.com/yofu/dxf/drawing"
+	"github.com/tobyjsullivan/dxf/drawing"
 )
 
 type Point struct {
@@ -18,6 +18,23 @@ func (p *Point) DistanceTo(other *Point) float64 {
 	dist := math.Sqrt(math.Pow(a, 2.0) + math.Pow(b, 2.0))
 
 	return dist
+}
+
+func (p *Point) DrawAt(angle float64, dist float64) *Point {
+
+	for angle < 0.0 {
+		angle += 2 * math.Pi
+	}
+
+	for angle > 2.0 * math.Pi {
+		angle -= 2 * math.Pi
+	}
+
+	hyp := dist
+	opp := hyp * math.Sin(angle)
+	adj := hyp * math.Cos(angle)
+
+	return p.DrawRight(adj).DrawUp(opp)
 }
 
 func (p *Point) DrawLeft(dist float64) *Point {

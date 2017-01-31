@@ -1,7 +1,7 @@
 package geometry
 
 import (
-	"github.com/yofu/dxf/drawing"
+	"github.com/tobyjsullivan/dxf/drawing"
 	"math"
 	"fmt"
 )
@@ -54,8 +54,6 @@ func (c *EllipseCurve) subLines() []*StraightLine {
 
 	scaleX :=  pointDistX / arcEndDistX
 	scaleY := pointDistY / arcEndDistY
-	//scaleX = 1.0
-	//scaleY = 1.0
 
 	fmt.Printf("Scaling at %.2fx%.2f\n", scaleX, scaleY)
 
