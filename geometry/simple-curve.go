@@ -1,75 +1,16 @@
 package geometry
 
 import (
-	"bytes"
-	"fmt"
 	"github.com/yofu/dxf/drawing"
 	"math"
 )
 
-type CurvedLine struct {
+type SimpleCurve struct {
 	Start   *Point
 	End     *Point
 }
 
-func (l *CurvedLine) GetStart() *Point {
-	return l.Start
-}
-
-func (l *CurvedLine) GetEnd() *Point {
-	return l.End
-}
-
-func (l *CurvedLine) ToEnglish() string {
-	return fmt.Sprintf("Curved line from %v to %v\n", l.Start, l.End)
-}
-
-func (l *CurvedLine) ToAutoCAD() string {
-
-	rise := l.End.Y - l.Start.Y
-	run := l.End.X - l.Start.X
-
-	tangentLength := run - rise
-	//radius := rise
-	arcStart := &Point{X: l.Start.X + tangentLength, Y: l.Start.Y}
-	if math.Abs(rise) > math.Abs(run) {
-		tangentLength = rise - run
-		arcStart = &Point{X: l.Start.X, Y: l.Start.Y + tangentLength}
-		//radius = run
-	}
-
-	arcMidpoint := &Point{
-		X: arcStart.X,
-		Y: l.End.Y,
-	}
-
-	tangent := &StraightLine{
-		Start: l.Start,
-		End:   arcStart,
-	}
-
-	w := new(bytes.Buffer)
-
-	// Draw tangent
-	fmt.Fprint(w, tangent.ToAutoCAD())
-
-	// Draw arc
-	fmt.Fprintf(
-		w,
-		"(command \"ARC\" \"%.1f,%.1f\" \"C\" \"%.1f,%.1f\" \"%.1f,%.1f\")\n",
-		arcStart.X,
-		arcStart.Y,
-		arcMidpoint.X,
-		arcMidpoint.Y,
-		l.End.X,
-		l.End.Y)
-
-	//drawArc(w, radius, arcStart.X, arcStart.Y, 1.57)
-
-	return w.String()
-}
-
-func (l *CurvedLine) DrawDXF(d *drawing.Drawing) error {
+func (l *SimpleCurve) DrawDXF(d *drawing.Drawing) error {
 	for _, line := range l.subLines() {
 		line.DrawDXF(d)
 	}
@@ -77,7 +18,7 @@ func (l *CurvedLine) DrawDXF(d *drawing.Drawing) error {
 	return nil
 }
 
-func (l *CurvedLine) subLines() []*StraightLine {
+func (l *SimpleCurve) subLines() []*StraightLine {
 	out := []*StraightLine{}
 
 	startAngle := math.Pi * (3.0 / 2.0)

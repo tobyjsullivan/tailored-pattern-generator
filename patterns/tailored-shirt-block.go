@@ -214,7 +214,7 @@ func (p *tailoredShirtBlock) GetCutLines() []geometry.Line {
 		End:   p.points["9"],
 	})
 
-	lines = append(lines, &geometry.CurvedLine{
+	lines = append(lines, &geometry.SimpleCurve{
 		Start: p.points["0"],
 		End:   p.points["8"],
 	})
@@ -224,7 +224,7 @@ func (p *tailoredShirtBlock) GetCutLines() []geometry.Line {
 		End:   p.points["14"],
 	})
 
-	lines = append(lines, &geometry.CurvedLine{
+	lines = append(lines, &geometry.SimpleCurve{
 		Start: p.points["14"],
 		End:   p.points["10"],
 	})
@@ -244,27 +244,27 @@ func (p *tailoredShirtBlock) GetCutLines() []geometry.Line {
 		End:   p.points["37"],
 	})
 
-	lines = append(lines, &geometry.CurvedLine{
+	lines = append(lines, &geometry.SimpleCurve{
 		Start: p.points["34"],
 		End:   p.points["37"],
 	})
 
-	lines = append(lines, &geometry.CurvedLine{
+	lines = append(lines, &geometry.SimpleCurve{
 		Start: p.points["34"],
 		End:   p.points["31"],
 	})
 
-	lines = append(lines, &geometry.CurvedLine{
+	lines = append(lines, &geometry.SimpleCurve{
 		Start: p.points["17"],
 		End:   p.points["31"],
 	})
 
-	lines = append(lines, &geometry.CurvedLine{
+	lines = append(lines, &geometry.SimpleCurve{
 		Start: p.points["17"],
 		End:   p.points["16"],
 	})
 
-	lines = append(lines, &geometry.CurvedLine{
+	lines = append(lines, &geometry.SimpleCurve{
 		Start: p.points["15"],
 		End:   p.points["16"],
 	})
@@ -285,22 +285,22 @@ func (p *tailoredShirtBlock) GetCutLines() []geometry.Line {
 		End:   p.points["36"],
 	})
 
-	lines = append(lines, &geometry.CurvedLine{
+	lines = append(lines, &geometry.SimpleCurve{
 		Start: p.points["33"],
 		End:   p.points["36"],
 	})
 
-	lines = append(lines, &geometry.CurvedLine{
+	lines = append(lines, &geometry.SimpleCurve{
 		Start: p.points["33"],
 		End:   p.points["30"],
 	})
 
-	lines = append(lines, &geometry.CurvedLine{
+	lines = append(lines, &geometry.SimpleCurve{
 		Start: p.points["17"],
 		End:   p.points["30"],
 	})
 
-	lines = append(lines, &geometry.CurvedLine{
+	lines = append(lines, &geometry.SimpleCurve{
 		Start: p.points["17"],
 		End:   p.points["24"],
 	})
@@ -310,7 +310,7 @@ func (p *tailoredShirtBlock) GetCutLines() []geometry.Line {
 		End:   p.points["21"],
 	})
 
-	lines = append(lines, &geometry.CurvedLine{
+	lines = append(lines, &geometry.SimpleCurve{
 		Start: p.points["22"],
 		End:   p.points["21"],
 	})

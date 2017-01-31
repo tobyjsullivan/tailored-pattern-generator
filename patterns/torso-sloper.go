@@ -73,7 +73,6 @@ func (p *TorsoSloper) GetPoints() map[string]*geometry.Point {
 	bh := i.DrawUp(adj).DrawLeft(adj)
 
 	za := a.DrawLeft(a.DistanceTo(ba) / 3.0)
-	zb := l.DrawUp(5.0)
 
 	return map[string]*geometry.Point{
 		"A": a,
@@ -100,7 +99,6 @@ func (p *TorsoSloper) GetPoints() map[string]*geometry.Point {
 		"BG": bg,
 		"BH": bh,
 		"ZA": za,
-		"ZB": zb,
 	}
 }
 
@@ -111,26 +109,28 @@ func (p *TorsoSloper) GetCutLines() []geometry.Line {
 		Start: points["A"],
 		End: points["ZA"],
 	}
-	backNecklineCurve := &geometry.CurvedLine{
+	shoulderAngle := angleOfLine(points["BB"], points["BD"])
+	backNecklineCurve := &geometry.EllipseCurve{
 		Start: points["ZA"],
 		End: points["BB"],
+		StartingAngleRads: math.Pi * (3.0 / 2.0),
+		ArcAngle: shoulderAngle,
 	}
 	shoulderLength := &geometry.StraightLine{
 		Start: points["BB"],
 		End: points["BD"],
 	}
-	backArmholeA := &geometry.CurvedLine{
-		Start: points["BD"],
-		End: points["BF"],
+	backArmholeA := &geometry.EllipseCurve{
+		Start: points["BF"],
+		End: points["BD"],
+		StartingAngleRads: 0.0,
+		ArcAngle: shoulderAngle,
 	}
-	backArmholeB := &geometry.CurvedLine{
+	backArmholeB := &geometry.EllipseCurve {
 		Start: points["M"],
 		End: points["BF"],
-	}
-
-	testCurve := &geometry.CurvedLine{
-		Start: points["D"],
-		End: points["ZB"],
+		StartingAngleRads: math.Pi * (3.0 / 2.0),
+		ArcAngle: math.Pi / 2.0,
 	}
 
 	return []geometry.Line{
@@ -139,8 +139,14 @@ func (p *TorsoSloper) GetCutLines() []geometry.Line {
 		shoulderLength,
 		backArmholeA,
 		backArmholeB,
-		testCurve,
 	}
+}
+
+func angleOfLine(p1 *geometry.Point, p2 *geometry.Point) float64 {
+	opp := p1.Y - p2.Y
+	adj := p1.X - p2.X
+
+	return math.Atan(opp / adj)
 }
 
 func (p *TorsoSloper) GetFoldLines() []geometry.Line {
