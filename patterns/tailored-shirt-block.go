@@ -3,10 +3,6 @@ package patterns
 import (
 	"fmt"
 	"github.com/tailored-style/pattern-generator/geometry"
-	"github.com/yofu/dxf"
-	"github.com/yofu/dxf/color"
-	"github.com/yofu/dxf/drawing"
-	"github.com/yofu/dxf/table"
 	"io"
 	"math"
 )
@@ -145,11 +141,11 @@ func NewTailoredShirtBlock(neck float64, chest float64, scyeDepth float64, natur
 	}
 }
 
-func (p *tailoredShirtBlock) getPoints() map[string]geometry.Point {
-	newMap := make(map[string]geometry.Point)
+func (p *tailoredShirtBlock) GetPoints() map[string]*geometry.Point {
+	newMap := make(map[string]*geometry.Point)
 
 	for key, val := range p.points {
-		newMap[key] = *val
+		newMap[key] = val
 	}
 
 	return newMap
@@ -210,7 +206,7 @@ func (p *tailoredShirtBlock) inst(w io.Writer, start string, end string, additio
 	fmt.Fprintln(w, ".")
 }
 
-func (p *tailoredShirtBlock) getCutLines() []geometry.Line {
+func (p *tailoredShirtBlock) GetCutLines() []geometry.Line {
 	lines := []geometry.Line{}
 
 	lines = append(lines, &geometry.StraightLine{
@@ -327,65 +323,33 @@ func (p *tailoredShirtBlock) getCutLines() []geometry.Line {
 	return lines
 }
 
-func (p *tailoredShirtBlock) DrawDXF(d *drawing.Drawing) error {
-	var err error
-	_, err = d.AddLayer("Cut Lines", dxf.DefaultColor, dxf.DefaultLineType, true)
-	if err != nil {
-		return err
+func (p *tailoredShirtBlock) GetFoldLines() []geometry.Line {
+	foldLines := []geometry.Line{
+		&geometry.StraightLine{
+			Start: p.points["22"],
+			End:   p.points["22"].SquareToHorizontalLine(p.points["36"].Y),
+		},
+		&geometry.StraightLine{
+			Start: p.points["28"],
+			End:   p.points["28"].SquareToHorizontalLine(p.points["36"].Y),
+		},
 	}
 
-	for _, line := range p.getCutLines() {
-		err := line.DrawDXF(d)
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err = d.AddLayer("Fold Lines", dxf.DefaultColor, table.LT_DASHDOT, true)
-	if err != nil {
-		return err
-	}
-
-	baseOf22 := p.points["22"].SquareToHorizontalLine(p.points["36"].Y)
-	fold1 := &geometry.StraightLine{
-		Start: p.points["22"],
-		End:   baseOf22,
-	}
-	err = fold1.DrawDXF(d)
-	if err != nil {
-		return err
-	}
-	fold2 := &geometry.StraightLine{
-		Start: p.points["22"],
-		End:   p.points["22"].SquareToHorizontalLine(p.points["36"].Y),
-	}
-	err = fold2.DrawDXF(d)
-	if err != nil {
-		return err
-	}
-
-	_, err = d.AddLayer("Grain Lines", color.Red, dxf.DefaultLineType, true)
-	if err != nil {
-		return err
-	}
-
-	grainLine1 := &geometry.StraightLine{
-		Start: p.points["g0"],
-		End:   p.points["g1"],
-	}
-	err = grainLine1.DrawDXF(d)
-	if err != nil {
-		return err
-	}
-
-	grainLine2 := &geometry.StraightLine{
-		Start: p.points["22"].DrawLeft(5.0),
-		End:   baseOf22.DrawLeft(5.0),
-	}
-	err = grainLine2.DrawDXF(d)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return foldLines
 }
+
+func (p *tailoredShirtBlock) GetGrainLines() []geometry.Line {
+	grainLines := []geometry.Line{
+		&geometry.StraightLine{
+			Start: p.points["g0"],
+			End:   p.points["g1"],
+		},
+		&geometry.StraightLine{
+			Start: p.points["22"].DrawLeft(5.0),
+			End:   p.points["22"].SquareToHorizontalLine(p.points["36"].Y).DrawLeft(5.0),
+		},
+	}
+
+	return grainLines
+}
+

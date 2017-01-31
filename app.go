@@ -41,13 +41,36 @@ func main() {
 	fmt.Println("Generating DXF...")
 	d := dxf.NewDrawing()
 	d.Header().LtScale = 100.0
-	err := block.DrawDXF(d)
+	err := patterns.DrawDXF(block, d)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	err = d.SaveAs("/Users/toby/sandbox/test-out.dxf")
+	err = d.SaveAs("/Users/toby/sandbox/test-tailored.dxf")
 	if err != nil {
 		panic(err.Error())
 	}
+
+	fmt.Println("Generating TORSO SLOPER DXF...")
+	torsoBlock := &patterns.TorsoSloper{
+		ChestCircumference: 106.7,
+		BackInterscyeLength: 43.2,
+		ShoulderToShoulder: 46.4,
+		ArmLength: 63.8,
+		BicepCircumference: 36.2,
+		Height: 182.9,
+	}
+	d2 := dxf.NewDrawing()
+	d2.Header().LtScale = 100.0
+	err = patterns.DrawDXF(torsoBlock, d2)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	err = d2.SaveAs("/Users/toby/sandbox/test-torso.dxf")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	fmt.Println("Done.")
 }

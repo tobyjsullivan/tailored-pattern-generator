@@ -3,6 +3,7 @@ package geometry
 import (
 	"fmt"
 	"math"
+	"github.com/yofu/dxf/drawing"
 )
 
 type Point struct {
@@ -52,4 +53,20 @@ func (p *Point) MidpointTo(other *Point) *Point {
 
 func (p *Point) String() string {
 	return fmt.Sprintf("[%.1f, %.1f]", p.X, p.Y)
+}
+
+func (p *Point) DrawDXF(label string, d *drawing.Drawing) error {
+	_, err := d.Line(p.X - 0.5, p.Y, 0.0, p.X + 0.5, p.Y, 0.0)
+	if err != nil {
+		return err
+	}
+
+	_, err = d.Line(p.X, p.Y - 0.5, 0.0, p.X, p.Y + 0.5, 0.0)
+	if err != nil {
+		return err
+	}
+
+	_, err = d.Text(label, p.X - 1.0, p.Y + 1.0, 0.0, 1.0)
+
+	return err
 }
