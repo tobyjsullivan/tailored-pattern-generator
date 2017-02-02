@@ -79,6 +79,7 @@ func (p *TorsoSloper) GetPoints() map[string]*geometry.Point {
 
 	fn := l.DrawDown(3.8)
 
+
 	backShoulderLength := bb.DistanceTo(bd)
 	fo := drawPointOnLine(fk, fn, backShoulderLength)
 
@@ -88,6 +89,19 @@ func (p *TorsoSloper) GetPoints() map[string]*geometry.Point {
 	fr := c.DrawDown(1.6)
 
 	za := a.DrawLeft(a.DistanceTo(ba) / 3.0)
+	zb := fr.MidpointTo(o)
+
+	zg := fi.DrawRight(1.9)
+
+	// Yoke
+
+	ze := fk.MidpointTo(fl)
+	// Draw 1.2 perpendicular to ze
+	ang = angleOfLine(ze, fk)
+	zf := ze.DrawAt(ang - (math.Pi / 2.0), 1.2)
+
+	zh := l.DrawDown(10.2)
+	zi := drawPointOnLine(zf, zh, zf.DistanceTo(zh) + 0.8)
 
 	return map[string]*geometry.Point{
 		"A": a,
@@ -124,6 +138,12 @@ func (p *TorsoSloper) GetPoints() map[string]*geometry.Point {
 		"FQ": fq,
 		"FR": fr,
 		"ZA": za,
+		"ZB": zb,
+		"ZE": ze,
+		"ZF": zf,
+		"ZG": zg,
+		"ZH": zh,
+		"ZI": zi,
 	}
 }
 
@@ -140,15 +160,7 @@ func angleOfLine(p0 *geometry.Point, p1 *geometry.Point) float64 {
 }
 
 func drawPointOnLine(p0 *geometry.Point, p1 *geometry.Point, distanceFromP0 float64) *geometry.Point {
-	run := (p1.X - p0.X)
-
-	angle := math.Atan((p1.Y - p0.Y)/run)
-
-	if run < 0.0 {
-		angle += math.Pi
-	}
-
-	return p0.DrawAt(angle, distanceFromP0)
+	return p0.DrawAt(angleOfLine(p0, p1), distanceFromP0)
 }
 
 func (p *TorsoSloper) GetCutLines() []geometry.Line {
@@ -195,9 +207,13 @@ func (p *TorsoSloper) GetCutLines() []geometry.Line {
 		End: points["B"],
 	}
 
-	frontShoulderAngle := angleOfLine(points["FK"], points["FO"])
-	frontNeckline := &geometry.EllipseCurve{
+	frontNecklineA := &geometry.StraightLine{
 		Start: points["FI"],
+		End: points["ZG"],
+	}
+	frontShoulderAngle := angleOfLine(points["FK"], points["FO"])
+	frontNecklineB := &geometry.EllipseCurve{
+		Start: points["ZG"],
 		End: points["FK"],
 		StartingAngleRads: math.Pi * (3.0 / 2.0),
 		ArcAngle: -frontShoulderAngle,
@@ -227,6 +243,20 @@ func (p *TorsoSloper) GetCutLines() []geometry.Line {
 		End: points["FR"],
 	}
 
+	frontHemlineA := &geometry.EllipseCurve{
+		Start: points["FR"],
+		End: points["ZB"],
+		StartingAngleRads: math.Pi * (3.0 / 2.0),
+		ArcAngle: math.Pi / 8.0,
+	}
+
+	frontHemlineB := &geometry.EllipseCurve{
+		Start: points["O"],
+		End: points["ZB"],
+		StartingAngleRads: math.Pi / 2.0,
+		ArcAngle: math.Pi / 8.0,
+	}
+
 	return []geometry.Line{
 		backNecklineStart,
 		backNecklineCurve,
@@ -236,11 +266,14 @@ func (p *TorsoSloper) GetCutLines() []geometry.Line {
 		backSideSeam,
 		backHemLine,
 		centreBack,
-		frontNeckline,
+		frontNecklineA,
+		frontNecklineB,
 		frontArmholeA,
 		frontArmholeB,
 		frontShoulderLength,
 		centreFront,
+		frontHemlineA,
+		frontHemlineB,
 	}
 }
 
@@ -258,21 +291,26 @@ func (p *TorsoSloper) GetLabels() []geometry.Drawable {
 	back := NewLabel("BACK", points["M"].MidpointTo(points["F"]))
 	back.Size = TEXT_SIZE_LARGE
 
-	centreBack := NewLabel("Centre Back", points["F"].MidpointTo(points["B"]))
+	centreBack := NewLabel("Centre Back", points["F"].MidpointTo(points["B"]).DrawLeft(0.2))
 	centreBack.Rotation = math.Pi / 2.0
 	centreBack.Size = TEXT_SIZE_SMALL
 
-	foldLine := NewLabel("FOLD", points["F"].MidpointTo(points["E"]))
+	foldLine := NewLabel("FOLD", points["F"].MidpointTo(points["E"]).DrawLeft(0.2))
 	foldLine.Rotation = math.Pi / 2.0
 	foldLine.Size = TEXT_SIZE_SMALL
 
 	front := NewLabel("FRONT", points["N"].MidpointTo(points["G"]))
 	front.Size = TEXT_SIZE_LARGE
 
+	centreFront := NewLabel("Centre Front", points["H"].MidpointTo(points["C"]).DrawRight(0.2))
+	centreFront.Rotation = -math.Pi / 2.0
+	centreFront.Size = TEXT_SIZE_SMALL
+
 	return []geometry.Drawable{
 		back,
 		centreBack,
 		foldLine,
 		front,
+		centreFront,
 	}
 }
