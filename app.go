@@ -108,5 +108,19 @@ func main() {
 		panic(err.Error())
 	}
 
+	v3Torso := patterns.NewV3Torso(&patterns.V3Measurements{
+		ChestCircumference: 106.7,
+		Height: 182.9,
+		WaistCircumference: 106.7,
+		NeckCircumference: 40.0,
+		HipCircumference: 106.7,
+		BiceptCircumference: 36.2,
+	})
+
+	d3 := dxf.NewDrawing()
+	d3.Header().LtScale = 100.0
+	v3Torso.DrawDXF(d3)
+	d3.SaveAs("/Users/toby/sandbox/v3-out.dxf")
+
 	fmt.Println("Done.")
 }
