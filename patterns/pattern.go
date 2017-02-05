@@ -6,6 +6,7 @@ import (
 	"github.com/tobyjsullivan/dxf/table"
 	"github.com/tailored-style/pattern-generator/geometry"
 	"github.com/tobyjsullivan/dxf/color"
+	"fmt"
 )
 
 const (
@@ -22,6 +23,12 @@ type Pattern interface {
 	StitchLines() []geometry.Line
 	GrainLines() []geometry.Line
 	Notations() []geometry.Drawable
+	Details() *PatternDetails
+}
+
+type PatternDetails struct {
+	Description string
+	StyleNumber string
 }
 
 func findOrCreateLayer(d *drawing.Drawing, name string, cl color.ColorNumber, lt *table.LineType) error {
@@ -43,6 +50,13 @@ func findOrCreateLayer(d *drawing.Drawing, name string, cl color.ColorNumber, lt
 }
 
 func DrawDXF(p Pattern, d *drawing.Drawing) error {
+	details := p.Details()
+
+	if details != nil {
+		d.Text(fmt.Sprintf("Style Number: %s", details.StyleNumber), 1.0, -1.0, 0.0, 1.0)
+		d.Text(details.Description, 1.0, -2.25, 0.0, 1.0)
+	}
+
 	var err error
 	err = findOrCreateLayer(d, CUT_LINES, dxf.DefaultColor, dxf.DefaultLineType)
 	if err != nil {
@@ -55,7 +69,6 @@ func DrawDXF(p Pattern, d *drawing.Drawing) error {
 			return err
 		}
 	}
-
 
 	err = findOrCreateLayer(d, STITCH_LINES, dxf.DefaultColor, table.NewLineType("Dotted", "Dot . . . .", 0.2, -0.1))
 	if err != nil {

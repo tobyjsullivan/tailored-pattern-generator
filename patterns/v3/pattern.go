@@ -1,6 +1,9 @@
 package v3
 
-import "github.com/tailored-style/pattern-generator/geometry"
+import (
+	"github.com/tailored-style/pattern-generator/geometry"
+	"github.com/tailored-style/pattern-generator/patterns"
+)
 
 type Pattern struct {
 	pieces []Piece
@@ -11,8 +14,23 @@ func (p *Pattern) populatePieces() error {
 		return nil
 	}
 
+	curX := 0.0
+
+	back := &TorsoBack{}
+	backBB := back.BoundingBox()
+	back.Origin.X = curX + backBB.TopLeft.X
+
+	curX += (backBB.BottomRight.X - backBB.TopLeft.X) + 5.0
+
+	front := &TorsoFront{}
+	frontBB := front.BoundingBox()
+	front.Origin.X = curX + frontBB.TopLeft.X
+
+	curX += (frontBB.BottomRight.X - frontBB.TopLeft.X) + 5.0
+
 	p.pieces = []Piece{
-		&TorsoFront{},
+		front,
+		back,
 	}
 
 	return nil
@@ -94,4 +112,11 @@ func (p *Pattern) Notations() []geometry.Drawable {
 	}
 
 	return out
+}
+
+func (p *Pattern) Details() *patterns.PatternDetails {
+	return &patterns.PatternDetails{
+		Description: "Tailored Shirt - v3.0",
+		StyleNumber: "11001",
+	}
 }

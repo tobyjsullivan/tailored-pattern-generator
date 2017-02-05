@@ -8,4 +8,11 @@ type Piece interface {
 	FoldLines() []geometry.Line
 	GrainLine() *geometry.Line
 	Notations() []geometry.Drawable
+	Dimensions() *geometry.Point
+	BoundingBox() *BoundingBox
+}
+
+type BoundingBox struct {
+	TopLeft *geometry.Point
+	BottomRight *geometry.Point
 }
