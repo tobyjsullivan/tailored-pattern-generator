@@ -10,24 +10,31 @@ import (
 
 const (
 	CUT_LINES = "Cut Lines"
+	STITCH_LINES = "Stitch Lines"
 	FOLD_LINES = "Fold Lines"
 	GRAIN_LINES = "Grain Lines"
 	NOTATIONS = "Notations"
 )
 
 type Pattern interface {
-	GetPoints() map[string]*geometry.Point
-	GetCutLines() []geometry.Line
-	GetFoldLines() []geometry.Line
-	GetGrainLines() []geometry.Line
-	GetLabels() []geometry.Drawable
+	CutLines() []geometry.Line
+	FoldLines() []geometry.Line
+	StitchLines() []geometry.Line
+	GrainLines() []geometry.Line
+	Notations() []geometry.Drawable
 }
 
 func findOrCreateLayer(d *drawing.Drawing, name string, cl color.ColorNumber, lt *table.LineType) error {
 	layer, _ := d.Layer(name, true)
 	if layer == nil {
-		_, err := d.AddLayer(name, cl, lt, true)
-		if err != nil {
+
+		// Check if linetype exists
+		existingLType, _ := d.LineType(lt.Name())
+		if existingLType == nil {
+			d.Sections[drawing.TABLES].(table.Tables)[table.LTYPE].Add(lt)
+		}
+
+		if _, err := d.AddLayer(name, cl, lt, true); err != nil {
 			return err
 		}
 	}
@@ -42,14 +49,20 @@ func DrawDXF(p Pattern, d *drawing.Drawing) error {
 		return err
 	}
 
-	for label, point := range p.GetPoints() {
-		err := point.DrawDXF(label, d)
+	for _, line := range p.CutLines() {
+		err := line.DrawDXF(d)
 		if err != nil {
 			return err
 		}
 	}
 
-	for _, line := range p.GetCutLines() {
+
+	err = findOrCreateLayer(d, STITCH_LINES, dxf.DefaultColor, table.NewLineType("Dotted", "Dot . . . .", 0.2, -0.1))
+	if err != nil {
+		return err
+	}
+
+	for _, line := range p.StitchLines() {
 		err := line.DrawDXF(d)
 		if err != nil {
 			return err
@@ -61,7 +74,7 @@ func DrawDXF(p Pattern, d *drawing.Drawing) error {
 		return err
 	}
 
-	for _, line := range p.GetFoldLines() {
+	for _, line := range p.FoldLines() {
 		err := line.DrawDXF(d)
 		if err != nil {
 			return err
@@ -73,7 +86,7 @@ func DrawDXF(p Pattern, d *drawing.Drawing) error {
 		return err
 	}
 
-	for _, line := range p.GetGrainLines() {
+	for _, line := range p.GrainLines() {
 		err := line.DrawDXF(d)
 		if err != nil {
 			return err
@@ -85,7 +98,7 @@ func DrawDXF(p Pattern, d *drawing.Drawing) error {
 		return err
 	}
 
-	for _, label := range p.GetLabels() {
+	for _, label := range p.Notations() {
 		err := label.DrawDXF(d)
 		if err != nil {
 			return err

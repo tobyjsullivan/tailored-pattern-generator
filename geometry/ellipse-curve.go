@@ -3,14 +3,15 @@ package geometry
 import (
 	"github.com/tobyjsullivan/dxf/drawing"
 	"math"
-	"fmt"
 )
 
+const PIECES_PER_LINE = 20
+
 type EllipseCurve struct {
-	Start             *Point
-	End               *Point
-	StartingAngleRads float64
-	ArcAngle          float64
+	Start         *Point
+	End           *Point
+	StartingAngle float64
+	ArcAngle      float64
 }
 
 func (c *EllipseCurve) DrawDXF(d *drawing.Drawing) error {
@@ -23,11 +24,9 @@ func (c *EllipseCurve) DrawDXF(d *drawing.Drawing) error {
 
 func (c *EllipseCurve) subLines() []*StraightLine {
 	out := []*StraightLine{}
-	fmt.Printf("Drawing an ellipse curve from %v to %v.\n", c.Start, c.End)
 
-	arcStartAngle := c.StartingAngleRads
+	arcStartAngle := c.StartingAngle
 	arcEndAngle := arcStartAngle + c.ArcAngle
-	fmt.Printf("Drawing arc from %.2f to %.2f\n", arcStartAngle, arcEndAngle)
 
 	// Simulate a simple circle until segment angle >= end angle
 	sx := c.Start.X + math.Cos(arcStartAngle)
@@ -35,8 +34,6 @@ func (c *EllipseCurve) subLines() []*StraightLine {
 
 	ex := c.Start.X + math.Cos(arcEndAngle)
 	ey := c.Start.Y + math.Sin(arcEndAngle)
-
-	fmt.Printf("Arc ends at (%.1f, %.1f)\n", ex, ey)
 
 	// Shift is how much the arc start is offset from curved line start
 	shiftX := c.Start.X - sx
@@ -49,16 +46,11 @@ func (c *EllipseCurve) subLines() []*StraightLine {
 	arcEndDistX := ex - sx
 	arcEndDistY := ey - sy
 
-	fmt.Printf("Distance between points is %.2f x %.2f\n", pointDistX, pointDistY)
-	fmt.Printf("Distance between arc endpoints is %.2f x %.2f\n", arcEndDistX, arcEndDistY)
-
 	scaleX :=  pointDistX / arcEndDistX
 	scaleY := pointDistY / arcEndDistY
 
-	fmt.Printf("Scaling at %.2fx%.2f\n", scaleX, scaleY)
-
 	// Draw out the transform
-	numPieces := 50
+	numPieces := PIECES_PER_LINE
 	chunkSize := c.ArcAngle / float64(numPieces)
 
 	for i := 0; i < numPieces; i++ {

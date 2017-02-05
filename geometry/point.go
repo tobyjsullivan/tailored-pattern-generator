@@ -34,22 +34,22 @@ func (p *Point) DrawAt(angle float64, dist float64) *Point {
 	opp := hyp * math.Sin(angle)
 	adj := hyp * math.Cos(angle)
 
-	return p.DrawRight(adj).DrawUp(opp)
+	return p.SquareRight(adj).SquareUp(opp)
 }
 
-func (p *Point) DrawLeft(dist float64) *Point {
+func (p *Point) SquareLeft(dist float64) *Point {
 	return &Point{p.X - dist, p.Y}
 }
 
-func (p *Point) DrawRight(dist float64) *Point {
+func (p *Point) SquareRight(dist float64) *Point {
 	return &Point{p.X + dist, p.Y}
 }
 
-func (p *Point) DrawUp(dist float64) *Point {
+func (p *Point) SquareUp(dist float64) *Point {
 	return &Point{p.X, p.Y + dist}
 }
 
-func (p *Point) DrawDown(dist float64) *Point {
+func (p *Point) SquareDown(dist float64) *Point {
 	return &Point{p.X, p.Y - dist}
 }
 
