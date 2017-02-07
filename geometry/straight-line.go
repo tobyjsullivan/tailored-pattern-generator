@@ -1,7 +1,6 @@
 package geometry
 
 import (
-	"github.com/tobyjsullivan/dxf/drawing"
 	"math"
 )
 
@@ -10,17 +9,14 @@ type StraightLine struct {
 	End   *Point
 }
 
-func (l *StraightLine) DrawDXF(d *drawing.Drawing) error {
-	_, err := d.Line(l.Start.X, l.Start.Y, 0.0, l.End.X, l.End.Y, 0.0)
-	//var err error = nil
-
-	return err
+func (l *StraightLine) StraightLines() []*StraightLine {
+	return []*StraightLine{l}
 }
 
 func (l *StraightLine) Angle() float64 {
 	run := (l.End.X - l.Start.X)
 
-	angle := math.Atan((l.End.Y - l.Start.Y)/run)
+	angle := math.Atan((l.End.Y - l.Start.Y) / run)
 
 	if run < 0.0 {
 		angle += math.Pi
@@ -36,6 +32,13 @@ func (l *StraightLine) PerpendicularAngle() float64 {
 func (l *StraightLine) Resize(length float64) *StraightLine {
 	return &StraightLine{
 		Start: l.Start,
-		End: l.Start.DrawAt(l.Angle(), length),
+		End:   l.Start.DrawAt(l.Angle(), length),
+	}
+}
+
+func (l *StraightLine) Move(x, y float64) *StraightLine {
+	return &StraightLine{
+		Start: l.Start.Move(x, y),
+		End:   l.End.Move(x, y),
 	}
 }

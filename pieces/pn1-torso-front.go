@@ -1,16 +1,16 @@
-package v3
+package pieces
 
 import (
 	"github.com/tailored-style/pattern-generator/geometry"
 	"math"
 )
 
-type TorsoFront struct {
-	Origin geometry.Point
+type PN1TorsoFront struct {
+	Origin  geometry.Point
 	anchors map[string]*geometry.Point
 }
 
-func (p *TorsoFront) computeAnchors() (map[string]*geometry.Point, error) {
+func (p *PN1TorsoFront) computeAnchors() (map[string]*geometry.Point, error) {
 	a := make(map[string]*geometry.Point)
 
 	a["0"] = &p.Origin
@@ -39,7 +39,7 @@ func (p *TorsoFront) computeAnchors() (map[string]*geometry.Point, error) {
 	return a, nil
 }
 
-func (p *TorsoFront) populateAnchors() error {
+func (p *PN1TorsoFront) populateAnchors() error {
 	if p.anchors != nil {
 		return nil
 	}
@@ -49,139 +49,89 @@ func (p *TorsoFront) populateAnchors() error {
 	return err
 }
 
-func (p *TorsoFront) Dimensions() *geometry.Point {
-	a, _ := p.computeAnchors()
-
-	var minX, maxX, minY, maxY float64
-	for _, p := range a {
-		if p.X < minX {
-			minX = p.X
-		}
-		if p.X > maxX {
-			maxX = p.X
-		}
-		if p.Y < minY {
-			minY = p.Y
-		}
-		if p.Y > maxY {
-			maxY = p.Y
-		}
-	}
-
-	return &geometry.Point{
-		X: maxX - minX,
-		Y: maxY - maxY,
-	}
-}
-
-func (p *TorsoFront) BoundingBox() *BoundingBox {
-	a, _ := p.computeAnchors()
-
-	var minX, maxX, minY, maxY float64
-	for _, p := range a {
-		if p.X < minX {
-			minX = p.X
-		}
-		if p.X > maxX {
-			maxX = p.X
-		}
-		if p.Y < minY {
-			minY = p.Y
-		}
-		if p.Y > maxY {
-			maxY = p.Y
-		}
-	}
-
-	return &BoundingBox{
-		TopLeft: &geometry.Point{
-			X: maxX,
-			Y: minY,
-		},
-		BottomRight: &geometry.Point{
-			X: minX,
-			Y: maxX,
-		},
-	}
-}
-
-func (p *TorsoFront) CutLines() []geometry.Line {
+func (p *PN1TorsoFront) CutLayer() *geometry.Block {
 	err := p.populateAnchors()
 	if err != nil {
 		panic(err)
 	}
+
+	layer := &geometry.Block{}
 
 	centreFront := &geometry.StraightLine{Start: p.anchors["2"], End: p.anchors["10"]}
+	layer.AddLine(centreFront)
 
-	return []geometry.Line{
-		centreFront,
-	}
+	return layer
 }
 
-func (p *TorsoFront) StitchLines() []geometry.Line {
+func (p *PN1TorsoFront) StitchLayer() *geometry.Block {
 	err := p.populateAnchors()
 	if err != nil {
 		panic(err)
 	}
 
+	layer := &geometry.Block{}
+
 	neckLine := &geometry.EllipseCurve{
-		Start: p.anchors["2"],
-		End: p.anchors["16"],
+		Start:         p.anchors["2"],
+		End:           p.anchors["16"],
 		StartingAngle: math.Pi * (3.0 / 2.0),
-		ArcAngle: math.Pi / 3.0,
+		ArcAngle:      math.Pi / 3.0,
 	}
+
 	shoulder := &geometry.StraightLine{
 		Start: p.anchors["16"],
-		End: p.anchors["17"],
+		End:   p.anchors["17"],
 	}
+
 	scyeTop := &geometry.EllipseCurve{
-		Start: p.anchors["6"],
-		End: p.anchors["17"],
+		Start:         p.anchors["6"],
+		End:           p.anchors["17"],
 		StartingAngle: 0.0,
-		ArcAngle: math.Pi / 8.0,
+		ArcAngle:      math.Pi / 8.0,
 	}
+
 	scyeBottom := &geometry.EllipseCurve{
-		Start: p.anchors["6"],
-		End: p.anchors["1"],
+		Start:         p.anchors["6"],
+		End:           p.anchors["1"],
 		StartingAngle: math.Pi,
-		ArcAngle: math.Pi * (2.0 / 5.0),
+		ArcAngle:      math.Pi * (2.0 / 5.0),
 	}
 
 	sideSeamA := &geometry.EllipseCurve{
-		Start: p.anchors["11"],
-		End: p.anchors["1"],
+		Start:         p.anchors["11"],
+		End:           p.anchors["1"],
 		StartingAngle: 0.0,
-		ArcAngle: math.Pi / 4.0,
+		ArcAngle:      math.Pi / 4.0,
 	}
 
 	sideSeamB := &geometry.EllipseCurve{
-		Start: p.anchors["11"],
-		End: p.anchors["12"],
+		Start:         p.anchors["11"],
+		End:           p.anchors["12"],
 		StartingAngle: math.Pi,
-		ArcAngle: math.Pi / 8.0,
+		ArcAngle:      math.Pi / 8.0,
 	}
 
 	sideSeamC := &geometry.EllipseCurve{
-		Start: p.anchors["13"],
-		End: p.anchors["12"],
+		Start:         p.anchors["13"],
+		End:           p.anchors["12"],
 		StartingAngle: 0.0,
-		ArcAngle: math.Pi / 8.0,
+		ArcAngle:      math.Pi / 8.0,
 	}
 
 	sideSeamD := &geometry.StraightLine{
 		Start: p.anchors["13"],
-		End: p.anchors["14"],
+		End:   p.anchors["14"],
 	}
 
 	hemLine := &geometry.SCurve{
-		Start: p.anchors["14"],
-		End: p.anchors["10"],
+		Start:         p.anchors["14"],
+		End:           p.anchors["10"],
 		StartingAngle: math.Pi * (3.0 / 2.0),
-		FinishAngle: math.Pi * (3.0 / 2.0),
-		MaxAngle: math.Pi / 8.0,
+		FinishAngle:   math.Pi * (3.0 / 2.0),
+		MaxAngle:      math.Pi / 8.0,
 	}
 
-	return []geometry.Line{
+	layer.AddLine(
 		neckLine,
 		shoulder,
 		scyeTop,
@@ -191,43 +141,27 @@ func (p *TorsoFront) StitchLines() []geometry.Line {
 		sideSeamC,
 		sideSeamD,
 		hemLine,
-	}
+	)
+
+	return layer
 }
 
-func (p *TorsoFront) FoldLines() []geometry.Line {
+func (p *PN1TorsoFront) NotationLayer() *geometry.Block {
 	err := p.populateAnchors()
 	if err != nil {
 		panic(err)
 	}
 
-	return []geometry.Line{}
-}
-
-func (p *TorsoFront) GrainLine() *geometry.Line {
-	err := p.populateAnchors()
-	if err != nil {
-		panic(err)
-	}
-
-	return nil
-}
-
-func (p *TorsoFront) Notations() []geometry.Drawable {
-	err := p.populateAnchors()
-	if err != nil {
-		panic(err)
-	}
-
-	out := []geometry.Drawable{}
+	layer := &geometry.Block{}
 
 	// Draw all points (DEBUG)
 	for k, p := range p.anchors {
-		a := &anchor{
-			Point: p,
-			label: k,
-		}
-		out = append(out, a)
+		layer.AddPoint(p)
+		layer.AddText(&geometry.Text{
+			Content:  k,
+			Position: p.Move(-1.0, -1.0),
+		})
 	}
 
-	return out
+	return layer
 }

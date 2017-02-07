@@ -1,7 +1,6 @@
 package geometry
 
 import (
-	"github.com/tobyjsullivan/dxf/drawing"
 	"math"
 )
 
@@ -14,15 +13,7 @@ type EllipseCurve struct {
 	ArcAngle      float64
 }
 
-func (c *EllipseCurve) DrawDXF(d *drawing.Drawing) error {
-	for _, line := range c.subLines() {
-		line.DrawDXF(d)
-	}
-
-	return nil
-}
-
-func (c *EllipseCurve) subLines() []*StraightLine {
+func (c *EllipseCurve) StraightLines() []*StraightLine {
 	out := []*StraightLine{}
 
 	arcStartAngle := c.StartingAngle
@@ -46,7 +37,7 @@ func (c *EllipseCurve) subLines() []*StraightLine {
 	arcEndDistX := ex - sx
 	arcEndDistY := ey - sy
 
-	scaleX :=  pointDistX / arcEndDistX
+	scaleX := pointDistX / arcEndDistX
 	scaleY := pointDistY / arcEndDistY
 
 	// Draw out the transform
@@ -54,17 +45,17 @@ func (c *EllipseCurve) subLines() []*StraightLine {
 	chunkSize := c.ArcAngle / float64(numPieces)
 
 	for i := 0; i < numPieces; i++ {
-		sRad := arcStartAngle + chunkSize * float64(i)
-		eRad := arcStartAngle + chunkSize * float64(i + 1)
+		sRad := arcStartAngle + chunkSize*float64(i)
+		eRad := arcStartAngle + chunkSize*float64(i+1)
 
 		p1 := &Point{
-			X: c.Start.X + scaleX * (math.Cos(sRad) + shiftX),
-			Y: c.Start.Y + scaleY * (math.Sin(sRad) + shiftY),
+			X: c.Start.X + scaleX*(math.Cos(sRad)+shiftX),
+			Y: c.Start.Y + scaleY*(math.Sin(sRad)+shiftY),
 		}
 
 		p2 := &Point{
-			X: c.Start.X + scaleX * (math.Cos(eRad) + shiftX),
-			Y: c.Start.Y + scaleY * (math.Sin(eRad) + shiftY),
+			X: c.Start.X + scaleX*(math.Cos(eRad)+shiftX),
+			Y: c.Start.Y + scaleY*(math.Sin(eRad)+shiftY),
 		}
 
 		out = append(out, &StraightLine{Start: p1, End: p2})

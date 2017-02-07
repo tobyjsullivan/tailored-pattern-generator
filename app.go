@@ -2,24 +2,21 @@ package main
 
 import (
 	"fmt"
-	"github.com/tobyjsullivan/dxf"
-	"github.com/tailored-style/pattern-generator/patterns/v3"
-	"github.com/tailored-style/pattern-generator/patterns"
+	"github.com/tailored-style/pattern-generator/patternfile"
+	"github.com/tailored-style/pattern-generator/styles"
 )
 
 func main() {
-
-	pattern := &v3.Pattern{}
+	style := &styles.SN11001Shirt{}
 
 	fmt.Println("Generating DXF...")
-	d := dxf.NewDrawing()
-	d.Header().LtScale = 1.0
-	err := patterns.DrawDXF(pattern, d)
+	pf := patternfile.NewPatternFile()
+	err := pf.DrawPattern(style)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	err = d.SaveAs("/Users/toby/sandbox/v3-out.dxf")
+	err = pf.SaveAs("/Users/toby/sandbox/v3-out.dxf")
 	if err != nil {
 		panic(err.Error())
 	}
