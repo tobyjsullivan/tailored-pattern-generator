@@ -11,6 +11,7 @@ import (
 	"github.com/tobyjsullivan/dxf/drawing"
 	"github.com/tobyjsullivan/dxf/table"
 	"github.com/tobyjsullivan/dxf"
+	"github.com/tailored-style/pattern-generator/pieces"
 )
 
 const (
@@ -19,6 +20,8 @@ const (
 	LAYER_FOLD      = "FOLD LINES"
 	LAYER_GRAIN     = "GRAIN LINES"
 	LAYER_NOTATIONS = "NOTATIONS"
+
+	LINE_SPACING = 1.4
 )
 
 type PatternFile struct {
@@ -62,28 +65,31 @@ func (d *PatternFile) SetLayer(layer string) error {
 func (pf *PatternFile) DrawPattern(s styles.Style) error {
 	var err error
 
-	// Draw style details
 	err = pf.SetLayer(LAYER_CUT)
 	if err != nil {
 		return err
 	}
 	details := s.Details()
 	if details != nil {
+		lines := []string{
+			fmt.Sprintf("Style Number: %s", details.StyleNumber),
+			details.Description,
+		}
+
+		// Write style details just above the origin mark
+		detailPosition := &geometry.Point {
+			X: 0.0,
+			Y: float64(len(lines)) * LINE_SPACING + 2.0,
+		}
 		detailsBlk := &geometry.Block{}
-		detailsBlk.AddText(&geometry.Text{
-			Content: fmt.Sprintf("Style Number: %s", details.StyleNumber),
-			Position: &geometry.Point{
-				X: 0.0,
-				Y: -1.0,
-			},
-		})
-		detailsBlk.AddText(&geometry.Text{
-			Content: details.Description,
-			Position: &geometry.Point{
-				X: 0.0,
-				Y: -2.25,
-			},
-		})
+		for _, l := range lines {
+			detailsBlk.AddText(&geometry.Text{
+				Content: l,
+				Position: detailPosition,
+			})
+
+			detailPosition = detailPosition.Move(0, -LINE_SPACING)
+		}
 
 		err = pf.DrawBlock(detailsBlk, &geometry.Point{})
 		if err != nil {
@@ -91,16 +97,38 @@ func (pf *PatternFile) DrawPattern(s styles.Style) error {
 		}
 	}
 
-	// Draw each piece
+	// Pieces on fold should be most left.
+	piecesOnFold := []pieces.Piece{}
+	piecesOffFold := []pieces.Piece{}
 	for _, p := range s.Pieces() {
-		pieceOffset := &geometry.Point{}
+		if p.OnFold() {
+			piecesOnFold = append(piecesOnFold, p)
+		} else {
+			piecesOffFold = append(piecesOffFold, p)
+		}
+	}
+	allPieces := append(piecesOnFold, piecesOffFold...)
+
+	// Draw each piece
+	cornerX, cornerY := 0.0, 0.0
+	for _, p := range allPieces {
+		cl := p.CutLayer()
+		sl := p.StitchLayer()
+		nl := p.NotationLayer()
+
+		bbox := geometry.CollectiveBoundingBox(cl, sl, nl)
+
+		pieceOffset := &geometry.Point{
+			X: cornerX - bbox.Left,
+			Y: cornerY - bbox.Top,
+		}
 
 		err = pf.SetLayer(LAYER_CUT)
 		if err != nil {
 			return err
 		}
 
-		err = pf.DrawBlock(p.CutLayer(), pieceOffset)
+		err = pf.DrawBlock(cl, pieceOffset)
 		if err != nil {
 			return err
 		}
@@ -110,7 +138,7 @@ func (pf *PatternFile) DrawPattern(s styles.Style) error {
 			return err
 		}
 
-		err = pf.DrawBlock(p.StitchLayer(), pieceOffset)
+		err = pf.DrawBlock(sl, pieceOffset)
 		if err != nil {
 			return err
 		}
@@ -120,10 +148,12 @@ func (pf *PatternFile) DrawPattern(s styles.Style) error {
 			return err
 		}
 
-		err = pf.DrawBlock(p.NotationLayer(), pieceOffset)
+		err = pf.DrawBlock(nl, pieceOffset)
 		if err != nil {
 			return err
 		}
+
+		cornerX += bbox.Width() + 10.0
 	}
 
 	return nil

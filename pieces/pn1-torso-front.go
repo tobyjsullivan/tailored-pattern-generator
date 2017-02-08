@@ -10,6 +10,10 @@ type PN1TorsoFront struct {
 	anchors map[string]*geometry.Point
 }
 
+func (p *PN1TorsoFront) OnFold() bool {
+	return false
+}
+
 func (p *PN1TorsoFront) computeAnchors() (map[string]*geometry.Point, error) {
 	a := make(map[string]*geometry.Point)
 
@@ -155,13 +159,17 @@ func (p *PN1TorsoFront) NotationLayer() *geometry.Block {
 	layer := &geometry.Block{}
 
 	// Draw all points (DEBUG)
-	for k, p := range p.anchors {
-		layer.AddPoint(p)
-		layer.AddText(&geometry.Text{
-			Content:  k,
-			Position: p.Move(-1.0, -1.0),
-		})
-	}
+	addAnchors(layer, p.anchors)
 
 	return layer
+}
+
+func addAnchors(b *geometry.Block, anchors map[string]*geometry.Point) {
+	for k, p := range anchors {
+		b.AddPoint(p)
+		b.AddText(&geometry.Text{
+			Content:  k,
+			Position: p.Move(-1.5, -1.0),
+		})
+	}
 }

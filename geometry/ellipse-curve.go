@@ -63,3 +63,12 @@ func (c *EllipseCurve) StraightLines() []*StraightLine {
 
 	return out
 }
+
+func (c *EllipseCurve) BoundingBox() *BoundingBox {
+	ls := c.StraightLines()
+	lines := make([]BoundedShape, 0, len(ls))
+	for _, l := range ls {
+		lines = append(lines, l)
+	}
+	return CollectiveBoundingBox(lines...)
+}

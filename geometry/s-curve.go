@@ -35,3 +35,12 @@ func (l *SCurve) StraightLines() []*StraightLine {
 
 	return out
 }
+
+func (c *SCurve) BoundingBox() *BoundingBox {
+	ls := c.StraightLines()
+	lines := make([]BoundedShape, 0, len(ls))
+	for _, l := range ls {
+		lines = append(lines, l)
+	}
+	return CollectiveBoundingBox(lines...)
+}

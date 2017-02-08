@@ -42,3 +42,7 @@ func (l *StraightLine) Move(x, y float64) *StraightLine {
 		End:   l.End.Move(x, y),
 	}
 }
+
+func (l *StraightLine) BoundingBox() *BoundingBox {
+	return CollectiveBoundingBox(l.Start, l.End)
+}

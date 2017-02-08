@@ -63,3 +63,17 @@ func (b *Block) Move(x, y float64) *Block {
 		Blocks:        blocks,
 	}
 }
+
+func (b *Block) BoundingBox() *BoundingBox {
+	children := make([]BoundedShape, 0, len(b.StraightLines) + len(b.Blocks) + len(b.Points))
+	for _, c := range b.StraightLines {
+		children = append(children, c)
+	}
+	for _, c := range b.Points {
+		children = append(children, c)
+	}
+	for _, c := range b.Blocks {
+		children = append(children, c)
+	}
+	return CollectiveBoundingBox(children...)
+}

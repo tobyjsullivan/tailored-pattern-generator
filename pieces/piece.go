@@ -6,4 +6,5 @@ type Piece interface {
 	StitchLayer() *geometry.Block
 	CutLayer() *geometry.Block
 	NotationLayer() *geometry.Block
+	OnFold() bool
 }

@@ -77,3 +77,12 @@ func (p *Point) Move(x, y float64) *Point {
 		Y: p.Y + y,
 	}
 }
+
+func (p *Point) BoundingBox() *BoundingBox {
+	return &BoundingBox{
+		Top: p.Y,
+		Left: p.X,
+		Right: p.X,
+		Bottom: p.Y,
+	}
+}
