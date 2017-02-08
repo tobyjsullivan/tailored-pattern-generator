@@ -12,6 +12,7 @@ func (p *SN11001Shirt) Pieces() []pieces.Piece {
 	return []pieces.Piece{
 		&pieces.PN1TorsoFront{},
 		&pieces.PN2TorsoBack{},
+		&pieces.PN3Yoke{},
 	}
 }
 

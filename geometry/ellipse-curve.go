@@ -4,7 +4,7 @@ import (
 	"math"
 )
 
-const PIECES_PER_LINE = 20
+const PIECES_PER_LINE = 12
 
 type EllipseCurve struct {
 	Start         *Point

@@ -22,6 +22,9 @@ const (
 	LAYER_NOTATIONS = "NOTATIONS"
 
 	LINE_SPACING = 1.4
+
+	PIECE_MARGIN = 5.00
+	MAX_WIDTH = 90.0
 )
 
 type PatternFile struct {
@@ -48,7 +51,7 @@ func (d *PatternFile) SetLayer(layer string) error {
 	case LAYER_CUT:
 		err = d.findOrCreateLayer(LAYER_CUT, dxf.DefaultColor, dxf.DefaultLineType)
 	case LAYER_STITCH:
-		err = d.findOrCreateLayer(LAYER_STITCH, dxf.DefaultColor, table.NewLineType("Dotted", "Dot . . . .", 0.2, -0.1))
+		err = d.findOrCreateLayer(LAYER_STITCH, dxf.DefaultColor, table.NewLineType("Dotted", "Dot . . . .", 0.1, -0.5))
 	case LAYER_NOTATIONS:
 		err = d.findOrCreateLayer(LAYER_NOTATIONS, dxf.DefaultColor, dxf.DefaultLineType)
 	case LAYER_FOLD:
@@ -107,53 +110,108 @@ func (pf *PatternFile) DrawPattern(s styles.Style) error {
 			piecesOffFold = append(piecesOffFold, p)
 		}
 	}
-	allPieces := append(piecesOnFold, piecesOffFold...)
 
 	// Draw each piece
 	cornerX, cornerY := 0.0, 0.0
-	for _, p := range allPieces {
-		cl := p.CutLayer()
-		sl := p.StitchLayer()
-		nl := p.NotationLayer()
+	j := 0
+	for i := 0; i < len(piecesOnFold); i++ {
+		// Draw first piece on fold
+		p := piecesOnFold[i]
 
-		bbox := geometry.CollectiveBoundingBox(cl, sl, nl)
+		pf.drawPiece(p, cornerX, cornerY)
 
-		pieceOffset := &geometry.Point{
-			X: cornerX - bbox.Left,
-			Y: cornerY - bbox.Top,
+		bbox := pieceBoundingBox(p)
+		rowMaxHeight := bbox.Height()
+		cornerX += bbox.Width() + PIECE_MARGIN
+
+		for ; cornerX < MAX_WIDTH && j < len(piecesOffFold); j++ {
+			p = piecesOffFold[j]
+			bbox = pieceBoundingBox(p)
+
+			if cornerX + bbox.Width() > MAX_WIDTH {
+				break
+			}
+
+			pf.drawPiece(p, cornerX, cornerY)
+
+			cornerX += bbox.Width() + PIECE_MARGIN
+			height := bbox.Height()
+			if height > rowMaxHeight {
+				rowMaxHeight = height
+			}
 		}
 
-		err = pf.SetLayer(LAYER_CUT)
-		if err != nil {
-			return err
+		cornerX = 0.0
+		cornerY -= rowMaxHeight + PIECE_MARGIN
+	}
+
+	rowMaxHeight := 0.0
+	for ; cornerX < MAX_WIDTH && j < len(piecesOffFold); j++ {
+		p := piecesOffFold[j]
+
+		pf.drawPiece(p, cornerX, cornerY)
+
+		bbox := pieceBoundingBox(p)
+		cornerX += bbox.Width() + PIECE_MARGIN
+		height := bbox.Height()
+		if height > rowMaxHeight {
+			rowMaxHeight = height
 		}
 
-		err = pf.DrawBlock(cl, pieceOffset)
-		if err != nil {
-			return err
+		if cornerX > MAX_WIDTH {
+			cornerX = 0.0
+			cornerY -= bbox.Height() + PIECE_MARGIN
+			rowMaxHeight = 0.0
 		}
+	}
 
-		err = pf.SetLayer(LAYER_STITCH)
-		if err != nil {
-			return err
-		}
+	return nil
+}
 
-		err = pf.DrawBlock(sl, pieceOffset)
-		if err != nil {
-			return err
-		}
+func pieceBoundingBox(p pieces.Piece) *geometry.BoundingBox {
+	cl := p.CutLayer()
+	sl := p.StitchLayer()
+	nl := p.NotationLayer()
 
-		err = pf.SetLayer(LAYER_NOTATIONS)
-		if err != nil {
-			return err
-		}
+	return geometry.CollectiveBoundingBox(cl, sl, nl)
+}
 
-		err = pf.DrawBlock(nl, pieceOffset)
-		if err != nil {
-			return err
-		}
+func (pf *PatternFile) drawPiece(p pieces.Piece, cornerX, cornerY float64) error {
+	bbox := pieceBoundingBox(p)
 
-		cornerX += bbox.Width() + 10.0
+	pieceOffset := &geometry.Point{
+		X: cornerX - bbox.Left,
+		Y: cornerY - bbox.Top,
+	}
+
+	err := pf.SetLayer(LAYER_CUT)
+	if err != nil {
+		return err
+	}
+
+	err = pf.DrawBlock(p.CutLayer(), pieceOffset)
+	if err != nil {
+		return err
+	}
+
+	err = pf.SetLayer(LAYER_STITCH)
+	if err != nil {
+		return err
+	}
+
+	err = pf.DrawBlock(p.StitchLayer(), pieceOffset)
+	if err != nil {
+		return err
+	}
+
+	err = pf.SetLayer(LAYER_NOTATIONS)
+	if err != nil {
+		return err
+	}
+
+	err = pf.DrawBlock(p.NotationLayer(), pieceOffset)
+	if err != nil {
+		return err
 	}
 
 	return nil

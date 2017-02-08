@@ -6,7 +6,6 @@ import (
 )
 
 type PN1TorsoFront struct {
-	Origin  geometry.Point
 	anchors map[string]*geometry.Point
 }
 
@@ -14,10 +13,14 @@ func (p *PN1TorsoFront) OnFold() bool {
 	return false
 }
 
-func (p *PN1TorsoFront) computeAnchors() (map[string]*geometry.Point, error) {
+func (p *PN1TorsoFront) populateAnchors() error {
+	if p.anchors != nil {
+		return nil
+	}
+
 	a := make(map[string]*geometry.Point)
 
-	a["0"] = &p.Origin
+	a["0"] = &geometry.Point{X: 0.0, Y: 0.0}
 	a["1"] = a["0"].SquareLeft(28.1)
 	a["2"] = a["0"].SquareUp(21.0)
 	a["3"] = a["0"].SquareLeft(22.9)
@@ -40,17 +43,17 @@ func (p *PN1TorsoFront) computeAnchors() (map[string]*geometry.Point, error) {
 	a["18"] = a["1"].MidpointTo(a["16"])
 	a["19"] = a["18"].DrawAt((&geometry.StraightLine{Start: a["1"], End: a["18"]}).PerpendicularAngle(), 1.6)
 
-	return a, nil
+	p.anchors = a
+	return nil
 }
 
-func (p *PN1TorsoFront) populateAnchors() error {
-	if p.anchors != nil {
-		return nil
+func (p *PN1TorsoFront) shoulderLength() (float64, error) {
+	err := p.populateAnchors()
+	if err != nil {
+		return 0.0, err
 	}
 
-	var err error
-	p.anchors, err = p.computeAnchors()
-	return err
+	return p.anchors["16"].DistanceTo(p.anchors["17"]), nil
 }
 
 func (p *PN1TorsoFront) CutLayer() *geometry.Block {

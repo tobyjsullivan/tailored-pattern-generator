@@ -6,7 +6,6 @@ import (
 )
 
 type PN2TorsoBack struct {
-	Origin  geometry.Point
 	anchors map[string]*geometry.Point
 }
 
@@ -14,10 +13,14 @@ func (p *PN2TorsoBack) OnFold() bool {
 	return true
 }
 
-func (p *PN2TorsoBack) computeAnchors() (map[string]*geometry.Point, error) {
+func (p *PN2TorsoBack) populateAnchors() error {
+	if p.anchors != nil {
+		return nil
+	}
+
 	a := make(map[string]*geometry.Point)
 
-	a["0"] = &p.Origin
+	a["0"] = &geometry.Point{X: 0.0, Y: 0.0}
 	a["1"] = a["0"].SquareRight(28.4)
 	a["2"] = a["0"].SquareUp(18.1)
 	a["3"] = a["1"].SquareToHorizontalLine(a["2"].Y)
@@ -43,17 +46,8 @@ func (p *PN2TorsoBack) computeAnchors() (map[string]*geometry.Point, error) {
 	a["23"] = a["21"].SquareRight(1.3)
 	a["24"] = a["21"].SquareLeft(1.3)
 
-	return a, nil
-}
-
-func (p *PN2TorsoBack) populateAnchors() error {
-	if p.anchors != nil {
-		return nil
-	}
-
-	var err error
-	p.anchors, err = p.computeAnchors()
-	return err
+	p.anchors = a
+	return nil
 }
 
 func (p *PN2TorsoBack) CutLayer() *geometry.Block {
