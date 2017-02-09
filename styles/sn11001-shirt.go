@@ -25,7 +25,7 @@ func (p *SN11001Shirt) Pieces() []pieces.Piece {
 
 func (p *SN11001Shirt) Details() *Details {
 	return &Details{
-		Description: "Tailored Shirt - v3.0",
+		Description: "Tailored Shirt - v3.0 TEST",
 		StyleNumber: "11001",
 		Measurements: p.Measurements,
 	}
