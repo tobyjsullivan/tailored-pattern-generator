@@ -9,6 +9,13 @@ type PN2TorsoBack struct {
 	anchors map[string]*geometry.Point
 }
 
+func (p *PN2TorsoBack) Details() *Details {
+	return &Details{
+		PieceNumber: "2",
+		Description: "Torso Back",
+	}
+}
+
 func (p *PN2TorsoBack) OnFold() bool {
 	return true
 }
@@ -167,11 +174,4 @@ func (p *PN2TorsoBack) NotationLayer() *geometry.Block {
 	addAnchors(layer, p.anchors)
 
 	return layer
-}
-
-func (p *PN2TorsoBack) Details() *Details {
-	return &Details{
-		PieceNumber: "2",
-		Description: "Torso Back",
-	}
 }

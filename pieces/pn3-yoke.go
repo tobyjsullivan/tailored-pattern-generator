@@ -9,6 +9,13 @@ type PN3Yoke struct {
 	anchors map[string]*geometry.Point
 }
 
+func (p *PN3Yoke) Details() *Details {
+	return &Details{
+		PieceNumber: "3",
+		Description: "Yoke",
+	}
+}
+
 func (p *PN3Yoke) OnFold() bool {
 	return true
 }
@@ -110,12 +117,5 @@ func (p *PN3Yoke) NotationLayer() *geometry.Block {
 	addAnchors(layer, p.anchors)
 
 	return layer
-}
-
-func (p *PN3Yoke) Details() *Details {
-	return &Details{
-		PieceNumber: "3",
-		Description: "Yoke",
-	}
 }
 

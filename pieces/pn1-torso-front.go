@@ -9,6 +9,14 @@ type PN1TorsoFront struct {
 	anchors map[string]*geometry.Point
 }
 
+func (p *PN1TorsoFront) Details() *Details {
+	return &Details{
+		PieceNumber: "1",
+		Description: "Torso Front",
+	}
+}
+
+
 func (p *PN1TorsoFront) OnFold() bool {
 	return false
 }
@@ -165,11 +173,4 @@ func (p *PN1TorsoFront) NotationLayer() *geometry.Block {
 	addAnchors(layer, p.anchors)
 
 	return layer
-}
-
-func (p *PN1TorsoFront) Details() *Details {
-	return &Details{
-		PieceNumber: "1",
-		Description: "Torso Front",
-	}
 }
