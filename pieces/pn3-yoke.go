@@ -26,7 +26,7 @@ func (p *PN3Yoke) populateAnchors() error {
 	a["3"] = a["1"].SquareRight(8.9)
 	a["4"] = a["2"].SquareToHorizontalLine(a["1"].Y)
 	a["5"] = a["3"].SquareUp(4.8)
-	frontShoulderLength, err := (&PN1TorsoFront{}).shoulderLength()
+	frontShoulderLength, err := p.shoulderLength()
 	if err != nil {
 		return err
 	}
@@ -35,6 +35,10 @@ func (p *PN3Yoke) populateAnchors() error {
 	p.anchors = a
 
 	return nil
+}
+
+func (p *PN3Yoke) shoulderLength() (float64, error) {
+	return (&PN1TorsoFront{}).shoulderLength()
 }
 
 func (p *PN3Yoke) StitchLayer() *geometry.Block {

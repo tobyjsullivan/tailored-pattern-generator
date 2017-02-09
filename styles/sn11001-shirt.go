@@ -5,12 +5,15 @@ import (
 )
 
 type SN11001Shirt struct {
+	pieces.Measurements
 	pieces []pieces.Piece
 }
 
 func (p *SN11001Shirt) Pieces() []pieces.Piece {
 	return []pieces.Piece{
-		&pieces.PN1TorsoFront{},
+		&pieces.PN4TorsoFront{
+			Measurements: p.Measurements,
+		},
 		&pieces.PN2TorsoBack{},
 		&pieces.PN3Yoke{},
 	}
