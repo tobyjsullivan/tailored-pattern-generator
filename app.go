@@ -16,6 +16,14 @@ func main() {
 		Height: 182.9, // 72"
 	}
 
+	//personal := &pieces.Measurements{
+	//	ChestCircumference: 110.0,
+	//	WaistCircumference: 96.5,
+	//	HipCircumference: 110.5,
+	//	NeckCircumference: 43.0,
+	//	Height: 182.0,
+	//}
+
 	style := &styles.SN11001Shirt{
 		Measurements: sample42In,
 	}

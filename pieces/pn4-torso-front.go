@@ -43,11 +43,11 @@ func (p *PN4TorsoFront) populateAnchors() error {
 	a["L"] = a["A"].SquareDown(p.NeckCircumference / 8.0 + 0.5)
 	a["M"] = a["L"].SquareLeft(p.NeckCircumference / 8.0 + 2.2)
 	a["N"] = a["M"].SquareToHorizontalLine(a["A"].Y)
-	a["O"] = a["B"].SquareLeft(p.ChestCircumference / 6.0 + 5.1)
+	a["O"] = a["B"].SquareLeft(p.ChestCircumference / 6.0 + 4.1)
 	a["P"] = a["O"].SquareToHorizontalLine(a["A"].Y)
-	a["Q"] = a["P"].SquareDown(5.7)
-	a["R"] = (&geometry.StraightLine{Start: a["N"], End: a["Q"]}).Resize(a["N"].DistanceTo(a["Q"]) + 1.3).End
-	a["S"] = a["O"].SquareUp(a["O"].DistanceTo(a["Q"]) / 3.0 + 1.6)
+	a["Q"] = a["P"].SquareDown(5.3)
+	a["R"] = (&geometry.StraightLine{Start: a["N"], End: a["Q"]}).Resize(a["N"].DistanceTo(a["Q"]) + 2.3).End
+	a["S"] = a["O"].SquareUp(a["O"].DistanceTo(a["Q"]) / 2.0)
 
 	p.anchors = a
 	return nil
