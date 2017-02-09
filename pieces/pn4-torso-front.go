@@ -163,3 +163,12 @@ func (p *PN4TorsoFront) NotationLayer() *geometry.Block {
 
 	return layer
 }
+
+func (p*PN4TorsoFront) shoulderSeamLength() float64 {
+	err := p.populateAnchors()
+	if err != nil {
+		panic(err)
+	}
+
+	return p.anchors["N"].DistanceTo(p.anchors["R"])
+}
