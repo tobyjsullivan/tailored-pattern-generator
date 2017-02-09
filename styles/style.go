@@ -12,4 +12,5 @@ type Style interface {
 type Details struct {
 	Description string
 	StyleNumber string
+	Measurements *pieces.Measurements
 }

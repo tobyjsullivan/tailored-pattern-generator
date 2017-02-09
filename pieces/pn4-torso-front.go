@@ -6,7 +6,7 @@ import (
 )
 
 type PN4TorsoFront struct {
-	Measurements
+	*Measurements
 	anchors map[string]*geometry.Point
 }
 

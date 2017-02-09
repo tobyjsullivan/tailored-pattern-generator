@@ -6,7 +6,7 @@ import (
 )
 
 type PN6Yoke struct {
-	Measurements
+	*Measurements
 	anchors map[string]*geometry.Point
 }
 

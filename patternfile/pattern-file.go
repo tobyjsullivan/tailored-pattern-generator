@@ -79,6 +79,16 @@ func (pf *PatternFile) DrawPattern(s styles.Style) error {
 			details.Description,
 		}
 
+		if details.Measurements != nil {
+			lines = append(lines, []string{
+				fmt.Sprintf("Height: %.1f cm", details.Measurements.Height),
+				fmt.Sprintf("Neck: %.1f cm", details.Measurements.NeckCircumference),
+				fmt.Sprintf("Chest: %.1f cm", details.Measurements.ChestCircumference),
+				fmt.Sprintf("Waist: %.1f cm", details.Measurements.WaistCircumference),
+				fmt.Sprintf("Hip: %.1f cm", details.Measurements.HipCircumference),
+			}...)
+		}
+
 		// Write style details just above the origin mark
 		detailPosition := &geometry.Point {
 			X: 0.0,
