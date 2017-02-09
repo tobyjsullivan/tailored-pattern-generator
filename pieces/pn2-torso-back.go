@@ -168,3 +168,10 @@ func (p *PN2TorsoBack) NotationLayer() *geometry.Block {
 
 	return layer
 }
+
+func (p *PN2TorsoBack) Details() *Details {
+	return &Details{
+		PieceNumber: "2",
+		Description: "Torso Back",
+	}
+}

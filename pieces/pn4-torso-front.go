@@ -150,13 +150,15 @@ func (p *PN4TorsoFront) NotationLayer() *geometry.Block {
 
 	layer := &geometry.Block{}
 
-	layer.AddText(&geometry.Text{
-		Content: "FRONT",
-		Position: p.anchors["B"].MidpointTo(p.anchors["E"]),
-	})
-
 	// Draw all points (DEBUG)
 	addAnchors(layer, p.anchors)
 
 	return layer
+}
+
+func (p *PN4TorsoFront) Details() *Details {
+	return &Details{
+		PieceNumber: "4",
+		Description: "Torso Front",
+	}
 }

@@ -7,6 +7,7 @@ type Piece interface {
 	CutLayer() *geometry.Block
 	NotationLayer() *geometry.Block
 	OnFold() bool
+	Details() *Details
 }
 
 func addAnchors(b *geometry.Block, anchors map[string]*geometry.Point) {

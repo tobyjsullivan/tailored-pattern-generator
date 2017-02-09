@@ -84,17 +84,7 @@ func (pf *PatternFile) DrawPattern(s styles.Style) error {
 			X: 0.0,
 			Y: float64(len(lines)) * LINE_SPACING + 2.0,
 		}
-		detailsBlk := &geometry.Block{}
-		for _, l := range lines {
-			detailsBlk.AddText(&geometry.Text{
-				Content: l,
-				Position: detailPosition,
-			})
-
-			detailPosition = detailPosition.Move(0, -LINE_SPACING)
-		}
-
-		err = pf.DrawBlock(detailsBlk, &geometry.Point{})
+		err = pf.drawMultilineText(lines, detailPosition)
 		if err != nil {
 			return err
 		}
@@ -168,6 +158,20 @@ func (pf *PatternFile) DrawPattern(s styles.Style) error {
 	return nil
 }
 
+func (pf *PatternFile) drawMultilineText(lines []string, pos *geometry.Point) error {
+	detailsBlk := &geometry.Block{}
+	for _, l := range lines {
+		detailsBlk.AddText(&geometry.Text{
+			Content: l,
+			Position: pos,
+		})
+
+		pos = pos.Move(0, -LINE_SPACING)
+	}
+
+	return pf.DrawBlock(detailsBlk, &geometry.Point{})
+}
+
 func pieceBoundingBox(p pieces.Piece) *geometry.BoundingBox {
 	cl := p.CutLayer()
 	sl := p.StitchLayer()
@@ -214,7 +218,17 @@ func (pf *PatternFile) drawPiece(p pieces.Piece, cornerX, cornerY float64) error
 		return err
 	}
 
-	return nil
+	// Stamp piece details
+	pieceCorner := &geometry.Point{X: cornerX, Y: cornerY}
+	pieceCentre := pieceCorner.MidpointTo(pieceCorner.Move(bbox.Width(), -bbox.Height()))
+	details := p.Details()
+	lines := []string {
+		fmt.Sprintf("PN: %s", details.PieceNumber),
+		details.Description,
+	}
+	err = pf.drawMultilineText(lines, pieceCentre)
+
+	return err
 }
 
 func (d *PatternFile) DrawBlock(b *geometry.Block, offset *geometry.Point) error {

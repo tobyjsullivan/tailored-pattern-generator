@@ -111,3 +111,11 @@ func (p *PN3Yoke) NotationLayer() *geometry.Block {
 
 	return layer
 }
+
+func (p *PN3Yoke) Details() *Details {
+	return &Details{
+		PieceNumber: "3",
+		Description: "Yoke",
+	}
+}
+
