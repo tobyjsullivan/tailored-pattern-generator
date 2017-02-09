@@ -3,7 +3,6 @@ package geometry
 import (
 	"fmt"
 	"math"
-	"github.com/tobyjsullivan/dxf/drawing"
 )
 
 type Point struct {
@@ -26,7 +25,7 @@ func (p *Point) DrawAt(angle float64, dist float64) *Point {
 		angle += 2 * math.Pi
 	}
 
-	for angle > 2.0 * math.Pi {
+	for angle > 2.0*math.Pi {
 		angle -= 2 * math.Pi
 	}
 
@@ -34,23 +33,23 @@ func (p *Point) DrawAt(angle float64, dist float64) *Point {
 	opp := hyp * math.Sin(angle)
 	adj := hyp * math.Cos(angle)
 
-	return p.DrawRight(adj).DrawUp(opp)
+	return p.Move(adj, opp)
 }
 
-func (p *Point) DrawLeft(dist float64) *Point {
-	return &Point{p.X - dist, p.Y}
+func (p *Point) SquareLeft(dist float64) *Point {
+	return p.Move(-dist, 0.0)
 }
 
-func (p *Point) DrawRight(dist float64) *Point {
-	return &Point{p.X + dist, p.Y}
+func (p *Point) SquareRight(dist float64) *Point {
+	return p.Move(dist, 0.0)
 }
 
-func (p *Point) DrawUp(dist float64) *Point {
-	return &Point{p.X, p.Y + dist}
+func (p *Point) SquareUp(dist float64) *Point {
+	return p.Move(0.0, dist)
 }
 
-func (p *Point) DrawDown(dist float64) *Point {
-	return &Point{p.X, p.Y - dist}
+func (p *Point) SquareDown(dist float64) *Point {
+	return p.Move(0.0, -dist)
 }
 
 func (p *Point) SquareToVerticalLine(x float64) *Point {
@@ -72,18 +71,18 @@ func (p *Point) String() string {
 	return fmt.Sprintf("[%.1f, %.1f]", p.X, p.Y)
 }
 
-func (p *Point) DrawDXF(label string, d *drawing.Drawing) error {
-	_, err := d.Line(p.X - 0.5, p.Y, 0.0, p.X + 0.5, p.Y, 0.0)
-	if err != nil {
-		return err
+func (p *Point) Move(x, y float64) *Point {
+	return &Point{
+		X: p.X + x,
+		Y: p.Y + y,
 	}
+}
 
-	_, err = d.Line(p.X, p.Y - 0.5, 0.0, p.X, p.Y + 0.5, 0.0)
-	if err != nil {
-		return err
+func (p *Point) BoundingBox() *BoundingBox {
+	return &BoundingBox{
+		Top: p.Y,
+		Left: p.X,
+		Right: p.X,
+		Bottom: p.Y,
 	}
-
-	_, err = d.Text(label, p.X - 1.0, p.Y + 1.0, 0.0, 1.0)
-
-	return err
 }
