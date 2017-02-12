@@ -24,36 +24,36 @@ func CollectiveBoundingBox(cs ...BoundedShape) *BoundingBox {
 		return nil
 	}
 
-	box := cs[0].BoundingBox()
-	top := box.Top
-	left := box.Left
-	right := box.Right
-	bottom := box.Bottom
+	collectiveBox := cs[0].BoundingBox()
 
 	for i := 1; i < len(cs); i++ {
-		box = cs[i].BoundingBox()
+		box := cs[i].BoundingBox()
 
-		if box.Top > top {
-			top = box.Top
+		// Empty blocks can have no bounding box
+		if box == nil {
+			continue
 		}
 
-		if box.Left < left {
-			left = box.Left
+		if collectiveBox == nil {
+			collectiveBox = box
 		}
 
-		if box.Right > right {
-			right = box.Right
+		if box.Top > collectiveBox.Top {
+			collectiveBox.Top = box.Top
 		}
 
-		if box.Bottom < bottom {
-			bottom = box.Bottom
+		if box.Left < collectiveBox.Left {
+			collectiveBox.Left = box.Left
+		}
+
+		if box.Right > collectiveBox.Right {
+			collectiveBox.Right = box.Right
+		}
+
+		if box.Bottom < collectiveBox.Bottom {
+			collectiveBox.Bottom = box.Bottom
 		}
 	}
 
-	return &BoundingBox{
-		Top: top,
-		Left: left,
-		Right: right,
-		Bottom: bottom,
-	}
+	return collectiveBox
 }
