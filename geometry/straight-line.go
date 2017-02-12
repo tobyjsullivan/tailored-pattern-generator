@@ -25,8 +25,12 @@ func (l *StraightLine) Angle() float64 {
 	return angle
 }
 
+func perpendicularAngle(a float64) float64 {
+	return a + math.Pi / 2.0
+}
+
 func (l *StraightLine) PerpendicularAngle() float64 {
-	return l.Angle() - (math.Pi / 2.0)
+	return perpendicularAngle(l.Angle())
 }
 
 func (l *StraightLine) Resize(length float64) *StraightLine {

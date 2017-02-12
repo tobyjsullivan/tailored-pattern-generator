@@ -75,5 +75,10 @@ func (b *Block) BoundingBox() *BoundingBox {
 	for _, c := range b.Blocks {
 		children = append(children, c)
 	}
+
+	if len(children) == 0 {
+		return nil
+	}
+
 	return CollectiveBoundingBox(children...)
 }
