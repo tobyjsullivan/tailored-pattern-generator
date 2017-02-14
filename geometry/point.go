@@ -59,7 +59,7 @@ func (p *Point) MidpointTo(other *Point) *Point {
 }
 
 func (p *Point) String() string {
-	return fmt.Sprintf("[%.1f, %.1f]", p.X, p.Y)
+	return fmt.Sprintf("(%.1f, %.1f)", p.X, p.Y)
 }
 
 func (p *Point) Move(x, y float64) *Point {

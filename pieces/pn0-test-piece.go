@@ -57,7 +57,7 @@ func (p *PN0TestPiece) CutLayer() *geometry.Block {
 		Start: p.anchors["B"],
 		End: p.anchors["C"],
 		StartingAngle: 0.0,
-		ArcAngle: math.Pi / 4.0,
+		ArcAngle: math.Pi / 16.0,
 	}
 
 	layer := &geometry.Block{}
