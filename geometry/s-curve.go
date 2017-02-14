@@ -27,7 +27,16 @@ func (l *SCurve) StraightLines() []*StraightLine {
 
 	out := []*StraightLine{}
 	out = append(out, start.StraightLines()...)
-	out = append(out, end.StraightLines()...)
+
+	// Reverse array of lines for second half
+	reversed := end.StraightLines()
+	for i := 0; i < (len(reversed) / 2); i++ {
+		tmp := reversed[i]
+		tail := len(reversed) - (i + 1)
+		reversed[i] = reversed[tail].Reverse()
+		reversed[tail] = tmp.Reverse()
+	}
+	out = append(out, reversed...)
 
 	return out
 }

@@ -42,7 +42,7 @@ func (p *PN6Yoke) populateAnchors() error {
 }
 
 func (p *PN6Yoke) shoulderSeamLength() float64 {
-	return (&PN4TorsoFront{Measurements: p.Measurements}).shoulderSeamLength()
+	return (&PN4TorsoFront{Measurements: p.Measurements}).shoulderStitch().Length()
 }
 
 func (p *PN6Yoke) StitchLayer() *geometry.Block {

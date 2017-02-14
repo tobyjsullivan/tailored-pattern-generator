@@ -2,6 +2,7 @@ package geometry
 
 import (
 	"math"
+	"fmt"
 )
 
 type Angle struct {
@@ -69,4 +70,27 @@ func (a *Angle) Sin() float64 {
 
 func (a *Angle) Cos() float64 {
 	return math.Cos(a.Radians())
+}
+
+func (a *Angle) String() string {
+	measure := fmt.Sprintf("%.2f", a.Rads)
+
+	switch a.Rads {
+	case math.Pi:
+		measure = "π"
+	case math.Pi * 1.5:
+		measure = "3π/2"
+	case math.Pi * 2.0:
+		measure = "2π"
+	case math.Pi / 2.0:
+		measure = "π/2"
+	case math.Pi / 4.0:
+		measure = "π/4"
+	case math.Pi / 8.0:
+		measure = "π/8"
+	case math.Pi / 16.0:
+		measure = "π/16"
+	}
+
+	return fmt.Sprintf("%s radians", measure)
 }

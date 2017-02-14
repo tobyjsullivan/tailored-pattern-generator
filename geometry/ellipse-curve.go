@@ -1,5 +1,7 @@
 package geometry
 
+import "fmt"
+
 const PIECES_PER_LINE = 12
 
 type EllipseCurve struct {
@@ -74,4 +76,8 @@ func (c *EllipseCurve) PointAt(dist float64) *Point {
 
 func (c *EllipseCurve) AngleAt(dist float64) *Angle {
 	return angleAtPointOnLine(c, dist)
+}
+
+func (c *EllipseCurve) String() string {
+	return fmt.Sprintf("EllipseCurve[Start: %v, End: %v, StartingAngle: %v, ArcAngle: %v]", c.Start, c.End, c.StartingAngle, c.ArcAngle)
 }

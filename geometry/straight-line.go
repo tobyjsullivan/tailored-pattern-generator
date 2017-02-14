@@ -62,3 +62,10 @@ func (l *StraightLine) PointAt(dist float64) *Point {
 		Y: l.Start.Y + ratio * (l.End.Y - l.Start.Y),
 	}
 }
+
+func (l *StraightLine) Reverse() *StraightLine {
+	return &StraightLine{
+		Start: l.End,
+		End: l.Start,
+	}
+}
