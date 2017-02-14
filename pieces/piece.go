@@ -1,6 +1,8 @@
 package pieces
 
-import "github.com/tailored-style/pattern-generator/geometry"
+import (
+	"github.com/tailored-style/pattern-generator/geometry"
+)
 
 const SEAM_ALLOWANCE = 1.0
 
@@ -54,4 +56,16 @@ func addSeamAllowance(l geometry.Line, opposite bool) geometry.Line {
 	}
 
 	return result
+}
+
+func notch(l geometry.Line, dist float64) geometry.Line {
+	p := l.PointAt(dist)
+
+	s := p.DrawAt(l.AngleAt(dist).Perpendicular(), SEAM_ALLOWANCE / 2.0)
+	e := p.DrawAt(l.AngleAt(dist).Perpendicular().Opposite(), SEAM_ALLOWANCE / 2.0)
+
+	return &geometry.StraightLine{
+		Start: s,
+		End: e,
+	}
 }

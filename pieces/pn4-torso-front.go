@@ -183,12 +183,18 @@ func (p *PN4TorsoFront) CutLayer() *geometry.Block {
 
 	centreFront := &geometry.StraightLine{Start: p.l(), End: p.k()}
 
+	armholeTop := addSeamAllowance(p.armholeTopStitch(), false)
+	armholeBottom := addSeamAllowance(p.armholeBottomStitch(), true)
+
 	layer.AddLine(
 		centreFront,
 		addSeamAllowance(p.necklineStitch(), true),
 		addSeamAllowance(p.shoulderStitch(), true),
-		addSeamAllowance(p.armholeTopStitch(), false),
-		addSeamAllowance(p.armholeBottomStitch(), true),
+		armholeTop,
+		notch(armholeTop, 7.6),
+		armholeBottom,
+		notch(armholeBottom, 7.6),
+		notch(armholeBottom, 8.9),
 		addSeamAllowance(p.sideSeamAStitch(), false),
 		addSeamAllowance(p.sideSeamBStitch(), true),
 		addSeamAllowance(p.sideSeamCStitch(), false),
