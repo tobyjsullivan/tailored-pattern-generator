@@ -19,19 +19,10 @@ func (p *Point) DistanceTo(other *Point) float64 {
 	return dist
 }
 
-func (p *Point) DrawAt(angle float64, dist float64) *Point {
-
-	for angle < 0.0 {
-		angle += 2 * math.Pi
-	}
-
-	for angle > 2.0*math.Pi {
-		angle -= 2 * math.Pi
-	}
-
+func (p *Point) DrawAt(angle *Angle, dist float64) *Point {
 	hyp := dist
-	opp := hyp * math.Sin(angle)
-	adj := hyp * math.Cos(angle)
+	opp := hyp * math.Sin(angle.Radians())
+	adj := hyp * math.Cos(angle.Radians())
 
 	return p.Move(adj, opp)
 }

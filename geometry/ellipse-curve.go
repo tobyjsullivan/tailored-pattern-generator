@@ -1,30 +1,28 @@
 package geometry
 
-import (
-	"math"
-)
+import "fmt"
 
 const PIECES_PER_LINE = 12
 
 type EllipseCurve struct {
 	Start         *Point
 	End           *Point
-	StartingAngle float64
-	ArcAngle      float64
+	StartingAngle *Angle
+	ArcAngle      *Angle
 }
 
 func (c *EllipseCurve) StraightLines() []*StraightLine {
 	out := []*StraightLine{}
 
 	arcStartAngle := c.StartingAngle
-	arcEndAngle := arcStartAngle + c.ArcAngle
+	arcEndAngle := arcStartAngle.Add(c.ArcAngle)
 
 	// Simulate a simple circle until segment angle >= end angle
-	sx := c.Start.X + math.Cos(arcStartAngle)
-	sy := c.Start.Y + math.Sin(arcStartAngle)
+	sx := c.Start.X + arcStartAngle.Cos()
+	sy := c.Start.Y + arcStartAngle.Sin()
 
-	ex := c.Start.X + math.Cos(arcEndAngle)
-	ey := c.Start.Y + math.Sin(arcEndAngle)
+	ex := c.Start.X + arcEndAngle.Cos()
+	ey := c.Start.Y + arcEndAngle.Sin()
 
 	// Shift is how much the arc start is offset from curved line start
 	shiftX := c.Start.X - sx
@@ -42,20 +40,20 @@ func (c *EllipseCurve) StraightLines() []*StraightLine {
 
 	// Draw out the transform
 	numPieces := PIECES_PER_LINE
-	chunkSize := c.ArcAngle / float64(numPieces)
+	chunkSize := c.ArcAngle.Divide(float64(numPieces))
 
 	for i := 0; i < numPieces; i++ {
-		sRad := arcStartAngle + chunkSize*float64(i)
-		eRad := arcStartAngle + chunkSize*float64(i+1)
+		sRad := arcStartAngle.Add(chunkSize.Multiply(float64(i)))
+		eRad := arcStartAngle.Add(chunkSize.Multiply(float64(i + 1)))
 
 		p1 := &Point{
-			X: c.Start.X + scaleX*(math.Cos(sRad)+shiftX),
-			Y: c.Start.Y + scaleY*(math.Sin(sRad)+shiftY),
+			X: c.Start.X + scaleX*(sRad.Cos() + shiftX),
+			Y: c.Start.Y + scaleY*(sRad.Sin() + shiftY),
 		}
 
 		p2 := &Point{
-			X: c.Start.X + scaleX*(math.Cos(eRad)+shiftX),
-			Y: c.Start.Y + scaleY*(math.Sin(eRad)+shiftY),
+			X: c.Start.X + scaleX*(eRad.Cos() + shiftX),
+			Y: c.Start.Y + scaleY*(eRad.Sin() + shiftY),
 		}
 
 		out = append(out, &StraightLine{Start: p1, End: p2})
@@ -65,10 +63,21 @@ func (c *EllipseCurve) StraightLines() []*StraightLine {
 }
 
 func (c *EllipseCurve) BoundingBox() *BoundingBox {
-	ls := c.StraightLines()
-	lines := make([]BoundedShape, 0, len(ls))
-	for _, l := range ls {
-		lines = append(lines, l)
-	}
-	return CollectiveBoundingBox(lines...)
+	return boundingBoxOfLine(c)
+}
+
+func (c *EllipseCurve) Length() float64 {
+	return lengthOfLine(c)
+}
+
+func (c *EllipseCurve) PointAt(dist float64) *Point {
+	return pointOnLine(c, dist)
+}
+
+func (c *EllipseCurve) AngleAt(dist float64) *Angle {
+	return angleAtPointOnLine(c, dist)
+}
+
+func (c *EllipseCurve) String() string {
+	return fmt.Sprintf("EllipseCurve[Start: %v, End: %v, StartingAngle: %v, ArcAngle: %v]", c.Start, c.End, c.StartingAngle, c.ArcAngle)
 }

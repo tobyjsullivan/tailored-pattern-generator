@@ -3,7 +3,6 @@ package patternfile
 import (
 	"errors"
 	"fmt"
-	"math"
 
 	"github.com/tailored-style/pattern-generator/geometry"
 	"github.com/tailored-style/pattern-generator/styles"
@@ -300,7 +299,9 @@ func (d *PatternFile) drawText(t *geometry.Text) error {
 	if err != nil {
 		return err
 	}
-	text.Rotate = 360.0 * (t.Rotation / (2.0 * math.Pi))
+	if t.Rotation != nil {
+		text.Rotate = t.Rotation.Degrees()
+	}
 	return nil
 }
 

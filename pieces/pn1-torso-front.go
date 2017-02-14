@@ -49,7 +49,7 @@ func (p *PN1TorsoFront) populateAnchors() error {
 	shoulderLength := shoulderSlope.Start.DistanceTo(shoulderSlope.End) + 1.0
 	a["17"] = shoulderSlope.Resize(shoulderLength).End
 	a["18"] = a["1"].MidpointTo(a["16"])
-	a["19"] = a["18"].DrawAt((&geometry.StraightLine{Start: a["1"], End: a["18"]}).PerpendicularAngle(), 1.6)
+	a["19"] = a["18"].DrawAt((&geometry.StraightLine{Start: a["1"], End: a["18"]}).AngleAt(0.0).Perpendicular(), 1.6)
 
 	p.anchors = a
 	return nil
@@ -89,8 +89,8 @@ func (p *PN1TorsoFront) StitchLayer() *geometry.Block {
 	neckLine := &geometry.EllipseCurve{
 		Start:         p.anchors["2"],
 		End:           p.anchors["16"],
-		StartingAngle: math.Pi * (3.0 / 2.0),
-		ArcAngle:      math.Pi / 3.0,
+		StartingAngle: &geometry.Angle{Rads: math.Pi * (3.0 / 2.0)},
+		ArcAngle:      &geometry.Angle{Rads: math.Pi / 3.0},
 	}
 
 	shoulder := &geometry.StraightLine{
@@ -101,36 +101,36 @@ func (p *PN1TorsoFront) StitchLayer() *geometry.Block {
 	scyeTop := &geometry.EllipseCurve{
 		Start:         p.anchors["6"],
 		End:           p.anchors["17"],
-		StartingAngle: 0.0,
-		ArcAngle:      math.Pi / 8.0,
+		StartingAngle: &geometry.Angle{Rads:0.0},
+		ArcAngle:      &geometry.Angle{Rads:math.Pi / 8.0},
 	}
 
 	scyeBottom := &geometry.EllipseCurve{
 		Start:         p.anchors["6"],
 		End:           p.anchors["1"],
-		StartingAngle: math.Pi,
-		ArcAngle:      math.Pi * (2.0 / 5.0),
+		StartingAngle: &geometry.Angle{Rads:math.Pi},
+		ArcAngle:      &geometry.Angle{Rads:math.Pi * (2.0 / 5.0)},
 	}
 
 	sideSeamA := &geometry.EllipseCurve{
 		Start:         p.anchors["11"],
 		End:           p.anchors["1"],
-		StartingAngle: 0.0,
-		ArcAngle:      math.Pi / 4.0,
+		StartingAngle: &geometry.Angle{Rads:0.0},
+		ArcAngle:      &geometry.Angle{Rads:math.Pi / 4.0},
 	}
 
 	sideSeamB := &geometry.EllipseCurve{
 		Start:         p.anchors["11"],
 		End:           p.anchors["12"],
-		StartingAngle: math.Pi,
-		ArcAngle:      math.Pi / 8.0,
+		StartingAngle: &geometry.Angle{Rads:math.Pi},
+		ArcAngle:      &geometry.Angle{Rads: math.Pi / 8.0},
 	}
 
 	sideSeamC := &geometry.EllipseCurve{
 		Start:         p.anchors["13"],
 		End:           p.anchors["12"],
-		StartingAngle: 0.0,
-		ArcAngle:      math.Pi / 8.0,
+		StartingAngle: &geometry.Angle{Rads: 0.0},
+		ArcAngle:      &geometry.Angle{Rads: math.Pi / 8.0},
 	}
 
 	sideSeamD := &geometry.StraightLine{
@@ -141,9 +141,9 @@ func (p *PN1TorsoFront) StitchLayer() *geometry.Block {
 	hemLine := &geometry.SCurve{
 		Start:         p.anchors["14"],
 		End:           p.anchors["10"],
-		StartingAngle: math.Pi * (3.0 / 2.0),
-		FinishAngle:   math.Pi * (3.0 / 2.0),
-		MaxAngle:      math.Pi / 8.0,
+		StartingAngle: &geometry.Angle{Rads: math.Pi * (3.0 / 2.0)},
+		FinishAngle:   &geometry.Angle{Rads: math.Pi * (3.0 / 2.0)},
+		MaxAngle:      &geometry.Angle{Rads: math.Pi / 8.0},
 	}
 
 	layer.AddLine(

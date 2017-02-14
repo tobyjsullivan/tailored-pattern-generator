@@ -7,7 +7,6 @@ import (
 
 type PN4TorsoFront struct {
 	*Measurements
-	anchors map[string]*geometry.Point
 }
 
 func (p *PN4TorsoFront) Details() *Details {
@@ -17,158 +16,238 @@ func (p *PN4TorsoFront) Details() *Details {
 	}
 }
 
-
 func (p *PN4TorsoFront) OnFold() bool {
 	return false
 }
 
-func (p *PN4TorsoFront) populateAnchors() error {
-	if p.anchors != nil {
-		return nil
+func (p *PN4TorsoFront) a() *geometry.Point {
+	return &geometry.Point{X: 0.0, Y: 0.0}
+}
+
+func (p *PN4TorsoFront) b() *geometry.Point {
+	return p.a().SquareDown(p.ChestCircumference / 4.0)
+}
+
+func (p *PN4TorsoFront) c() *geometry.Point {
+	return p.b().SquareLeft(p.ChestCircumference/4.0 + 1.4)
+}
+
+func (p *PN4TorsoFront) d() *geometry.Point {
+	return p.a().SquareDown(p.Height/4.0 - 3.2)
+}
+
+func (p *PN4TorsoFront) e() *geometry.Point {
+	return p.d().SquareLeft(p.WaistCircumference/4.0 + 3.2)
+}
+
+func (p *PN4TorsoFront) f() *geometry.Point {
+	return p.a().SquareDown(p.Height/3.0 - 5.7)
+}
+
+func (p *PN4TorsoFront) g() *geometry.Point {
+	return p.f().SquareLeft(p.HipCircumference/4.0 - 0.6)
+}
+
+func (p *PN4TorsoFront) h() *geometry.Point {
+	return p.a().SquareDown(p.Height*(3.0/8.0) + 3.2)
+}
+
+func (p *PN4TorsoFront) i() *geometry.Point {
+	return p.h().SquareLeft(p.HipCircumference/4.0 + 0.6)
+}
+
+func (p *PN4TorsoFront) j() *geometry.Point {
+	return p.i().SquareUp(7.0)
+}
+
+func (p *PN4TorsoFront) k() *geometry.Point {
+	return p.h().SquareDown(4.4)
+}
+
+func (p *PN4TorsoFront) l() *geometry.Point {
+	return p.a().SquareDown(p.NeckCircumference/8.0 + 0.5)
+}
+
+func (p *PN4TorsoFront) m() *geometry.Point {
+	return p.l().SquareLeft(p.NeckCircumference/8.0 + 2.2)
+}
+
+func (p *PN4TorsoFront) n() *geometry.Point {
+	return p.m().SquareToHorizontalLine(p.a().Y)
+}
+
+func (p *PN4TorsoFront) o() *geometry.Point {
+	return p.b().SquareLeft(p.ChestCircumference/6.0 + 4.1)
+}
+
+func (p *PN4TorsoFront) p() *geometry.Point {
+	return p.o().SquareToHorizontalLine(p.a().Y)
+}
+
+func (p *PN4TorsoFront) q() *geometry.Point {
+	return p.p().SquareDown(5.3)
+}
+
+func (p *PN4TorsoFront) r() *geometry.Point {
+	n := p.n()
+	q := p.q()
+	return (&geometry.StraightLine{Start: n, End: q}).Resize(n.DistanceTo(q) + 2.3).End
+}
+
+func (p *PN4TorsoFront) s() *geometry.Point {
+	o := p.o()
+	return  o.SquareUp(o.DistanceTo(p.q()) / 2.0)
+}
+
+func (p *PN4TorsoFront) necklineStitch() geometry.Line {
+	return &geometry.EllipseCurve{
+		Start:         p.l(),
+		End:           p.n(),
+		StartingAngle: &geometry.Angle{Rads: math.Pi / 2.0},
+		ArcAngle:      &geometry.Angle{Rads: math.Pi / 3.0},
 	}
+}
 
-	a := make(map[string]*geometry.Point)
+func (p *PN4TorsoFront) shoulderStitch() geometry.Line {
+	return &geometry.StraightLine{
+		Start: p.n(),
+		End:   p.r(),
+	}
+}
 
-	a["A"] = &geometry.Point{X: 0.0, Y: 0.0}
-	a["B"] = a["A"].SquareDown(p.ChestCircumference / 4.0)
-	a["C"] = a["B"].SquareLeft(p.ChestCircumference / 4.0 + 1.4)
-	a["D"] = a["A"].SquareDown(p.Height / 4.0 - 3.2)
-	a["E"] = a["D"].SquareLeft(p.WaistCircumference / 4.0 + 3.2)
-	a["F"] = a["A"].SquareDown(p.Height / 3.0 - 5.7)
-	a["G"] = a["F"].SquareLeft(p.HipCircumference / 4.0 - 0.6)
-	a["H"] = a["A"].SquareDown(p.Height * (3.0/8.0) + 3.2)
-	a["I"] = a["H"].SquareLeft(p.HipCircumference / 4.0 + 0.6)
-	a["J"] = a["I"].SquareUp(7.0)
-	a["K"] = a["H"].SquareDown(4.4)
-	a["L"] = a["A"].SquareDown(p.NeckCircumference / 8.0 + 0.5)
-	a["M"] = a["L"].SquareLeft(p.NeckCircumference / 8.0 + 2.2)
-	a["N"] = a["M"].SquareToHorizontalLine(a["A"].Y)
-	a["O"] = a["B"].SquareLeft(p.ChestCircumference / 6.0 + 4.1)
-	a["P"] = a["O"].SquareToHorizontalLine(a["A"].Y)
-	a["Q"] = a["P"].SquareDown(5.3)
-	a["R"] = (&geometry.StraightLine{Start: a["N"], End: a["Q"]}).Resize(a["N"].DistanceTo(a["Q"]) + 2.3).End
-	a["S"] = a["O"].SquareUp(a["O"].DistanceTo(a["Q"]) / 2.0)
+func (p *PN4TorsoFront) armholeTopStitch() geometry.Line {
+	return &geometry.EllipseCurve{
+		Start:         p.s(),
+		End:           p.r(),
+		StartingAngle: &geometry.Angle{Rads: 0.0},
+		ArcAngle:      &geometry.Angle{Rads: math.Pi / 8.0},
+	}
+}
 
-	p.anchors = a
-	return nil
+func (p *PN4TorsoFront) armholeBottomStitch() geometry.Line {
+	return &geometry.EllipseCurve{
+		Start:         p.s(),
+		End:           p.c(),
+		StartingAngle: &geometry.Angle{Rads: math.Pi},
+		ArcAngle:      &geometry.Angle{Rads: math.Pi * (2.0 / 5.0)},
+	}
+}
+
+func (p *PN4TorsoFront) sideSeamAStitch() geometry.Line {
+	return &geometry.EllipseCurve{
+		Start:         p.e(),
+		End:           p.c(),
+		StartingAngle: &geometry.Angle{Rads: 0.0},
+		ArcAngle:      &geometry.Angle{Rads: math.Pi / 4.0},
+	}
+}
+
+func (p *PN4TorsoFront) sideSeamBStitch() geometry.Line {
+	return &geometry.EllipseCurve{
+		Start:         p.e(),
+		End:           p.g(),
+		StartingAngle: &geometry.Angle{Rads: math.Pi},
+		ArcAngle:      &geometry.Angle{Rads: math.Pi / 8.0},
+	}
+}
+
+func (p *PN4TorsoFront) sideSeamCStitch() geometry.Line {
+	return &geometry.EllipseCurve{
+		Start:         p.j(),
+		End:           p.g(),
+		StartingAngle: &geometry.Angle{Rads: 0.0},
+		ArcAngle:      &geometry.Angle{Rads: math.Pi / 8.0},
+	}
+}
+
+func (p *PN4TorsoFront) sideSeamDStitch() geometry.Line {
+	return &geometry.StraightLine{
+		Start: p.j(),
+		End:   p.i(),
+	}
+}
+
+
+func (p *PN4TorsoFront) hemlineStitch() geometry.Line {
+	return &geometry.SCurve{
+		Start:         p.k(),
+		End:           p.i(),
+		StartingAngle: &geometry.Angle{Rads: math.Pi / 2.0},
+		FinishAngle:   &geometry.Angle{Rads: math.Pi / 2.0},
+		MaxAngle:      &geometry.Angle{Rads: math.Pi / 8.0},
+	}
 }
 
 func (p *PN4TorsoFront) CutLayer() *geometry.Block {
-	err := p.populateAnchors()
-	if err != nil {
-		panic(err)
-	}
-
 	layer := &geometry.Block{}
 
-	centreFront := &geometry.StraightLine{Start: p.anchors["L"], End: p.anchors["K"]}
-	layer.AddLine(centreFront)
+	centreFront := &geometry.StraightLine{Start: p.l(), End: p.k()}
+
+	armholeTop := addSeamAllowance(p.armholeTopStitch(), false)
+	armholeBottom := addSeamAllowance(p.armholeBottomStitch(), true)
+
+	layer.AddLine(
+		centreFront,
+		addSeamAllowance(p.necklineStitch(), true),
+		addSeamAllowance(p.shoulderStitch(), true),
+		armholeTop,
+		notch(armholeTop, 7.6),
+		armholeBottom,
+		notch(armholeBottom, 7.6),
+		notch(armholeBottom, 8.9),
+		addSeamAllowance(p.sideSeamAStitch(), false),
+		addSeamAllowance(p.sideSeamBStitch(), true),
+		addSeamAllowance(p.sideSeamCStitch(), false),
+		addSeamAllowance(p.sideSeamDStitch(), true),
+		addSeamAllowance(p.hemlineStitch(), false),
+	)
 
 	return layer
 }
 
 func (p *PN4TorsoFront) StitchLayer() *geometry.Block {
-	err := p.populateAnchors()
-	if err != nil {
-		panic(err)
-	}
-
 	layer := &geometry.Block{}
 
-	neckLine := &geometry.EllipseCurve{
-		Start: p.anchors["L"],
-		End: p.anchors["N"],
-		StartingAngle: math.Pi / 2.0,
-		ArcAngle: math.Pi / 3.0,
-	}
-
-	shoulderLine := &geometry.StraightLine{
-		Start: p.anchors["N"],
-		End: p.anchors["R"],
-	}
-
-	armscyeTop := &geometry.EllipseCurve{
-		Start: p.anchors["S"],
-		End: p.anchors["R"],
-		StartingAngle: 0.0,
-		ArcAngle:      math.Pi / 8.0,
-	}
-
-	armscyeBottom := &geometry.EllipseCurve{
-		Start: p.anchors["S"],
-		End: p.anchors["C"],
-		StartingAngle: math.Pi,
-		ArcAngle:      math.Pi * (2.0 / 5.0),
-	}
-
-	sideSeamA := &geometry.EllipseCurve{
-		Start:         p.anchors["E"],
-		End:           p.anchors["C"],
-		StartingAngle: 0.0,
-		ArcAngle:      math.Pi / 4.0,
-	}
-
-	sideSeamB := &geometry.EllipseCurve{
-		Start:         p.anchors["E"],
-		End:           p.anchors["G"],
-		StartingAngle: math.Pi,
-		ArcAngle:      math.Pi / 8.0,
-	}
-
-	sideSeamC := &geometry.EllipseCurve{
-		Start:         p.anchors["J"],
-		End:           p.anchors["G"],
-		StartingAngle: 0.0,
-		ArcAngle:      math.Pi / 8.0,
-	}
-
-	sideSeamD := &geometry.StraightLine{
-		Start: p.anchors["J"],
-		End:   p.anchors["I"],
-	}
-
-	hemLine := &geometry.SCurve{
-		Start: p.anchors["K"],
-		End: p.anchors["I"],
-		StartingAngle: math.Pi / 2.0,
-		FinishAngle: math.Pi / 2.0,
-		MaxAngle: math.Pi / 8.0,
-	}
-
 	layer.AddLine(
-		neckLine,
-		shoulderLine,
-		armscyeTop,
-		armscyeBottom,
-		sideSeamA,
-		sideSeamB,
-		sideSeamC,
-		sideSeamD,
-		hemLine,
+		p.necklineStitch(),
+		p.shoulderStitch(),
+		p.armholeTopStitch(),
+		p.armholeBottomStitch(),
+		p.sideSeamAStitch(),
+		p.sideSeamBStitch(),
+		p.sideSeamCStitch(),
+		p.sideSeamDStitch(),
+		p.hemlineStitch(),
 	)
 
 	return layer
 }
 
 func (p *PN4TorsoFront) NotationLayer() *geometry.Block {
-	err := p.populateAnchors()
-	if err != nil {
-		panic(err)
-	}
-
 	layer := &geometry.Block{}
 
 	// Draw all points (DEBUG)
-	addAnchors(layer, p.anchors)
+	anchors := make(map[string]*geometry.Point)
+	anchors["A"] = p.a()
+	anchors["B"] = p.b()
+	anchors["C"] = p.c()
+	anchors["D"] = p.d()
+	anchors["E"] = p.e()
+	anchors["F"] = p.f()
+	anchors["G"] = p.g()
+	anchors["H"] = p.h()
+	anchors["I"] = p.i()
+	anchors["J"] = p.j()
+	anchors["K"] = p.k()
+	anchors["L"] = p.l()
+	anchors["M"] = p.m()
+	anchors["N"] = p.n()
+	anchors["O"] = p.o()
+	anchors["P"] = p.p()
+	anchors["Q"] = p.q()
+	anchors["R"] = p.r()
+	anchors["S"] = p.s()
+	addAnchors(layer, anchors)
 
 	return layer
-}
-
-func (p*PN4TorsoFront) shoulderSeamLength() float64 {
-	err := p.populateAnchors()
-	if err != nil {
-		panic(err)
-	}
-
-	return p.anchors["N"].DistanceTo(p.anchors["R"])
 }
