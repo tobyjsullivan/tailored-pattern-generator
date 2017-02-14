@@ -1,15 +1,11 @@
 package geometry
 
-import (
-	"math"
-)
-
 type SCurve struct {
 	Start         *Point
 	End           *Point
-	StartingAngle float64
-	FinishAngle   float64
-	MaxAngle      float64
+	StartingAngle *Angle
+	FinishAngle   *Angle
+	MaxAngle      *Angle
 }
 
 func (l *SCurve) StraightLines() []*StraightLine {
@@ -25,7 +21,7 @@ func (l *SCurve) StraightLines() []*StraightLine {
 	end := &EllipseCurve{
 		Start:         l.End,
 		End:           mid,
-		StartingAngle: l.FinishAngle - math.Pi,
+		StartingAngle: l.FinishAngle.Opposite(),
 		ArcAngle:      l.MaxAngle,
 	}
 
@@ -37,10 +33,17 @@ func (l *SCurve) StraightLines() []*StraightLine {
 }
 
 func (c *SCurve) BoundingBox() *BoundingBox {
-	ls := c.StraightLines()
-	lines := make([]BoundedShape, 0, len(ls))
-	for _, l := range ls {
-		lines = append(lines, l)
-	}
-	return CollectiveBoundingBox(lines...)
+	return boundingBoxOfLine(c)
+}
+
+func (c *SCurve) Length() float64 {
+	return lengthOfLine(c)
+}
+
+func (c *SCurve) PointAt(dist float64) *Point {
+	return pointOnLine(c, dist)
+}
+
+func (c *SCurve) AngleAt(dist float64) *Angle {
+	return angleAtPointOnLine(c, dist)
 }

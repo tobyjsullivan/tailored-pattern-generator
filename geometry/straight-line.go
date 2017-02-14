@@ -2,6 +2,7 @@ package geometry
 
 import (
 	"math"
+	"fmt"
 )
 
 type StraightLine struct {
@@ -13,7 +14,7 @@ func (l *StraightLine) StraightLines() []*StraightLine {
 	return []*StraightLine{l}
 }
 
-func (l *StraightLine) Angle() float64 {
+func (l *StraightLine) AngleAt(_ float64) *Angle {
 	run := (l.End.X - l.Start.X)
 
 	angle := math.Atan((l.End.Y - l.Start.Y) / run)
@@ -22,18 +23,20 @@ func (l *StraightLine) Angle() float64 {
 		angle += math.Pi
 	}
 
-	return angle
-}
-
-func (l *StraightLine) PerpendicularAngle() float64 {
-	return l.Angle() - (math.Pi / 2.0)
+	return &Angle{
+		Rads: angle,
+	}
 }
 
 func (l *StraightLine) Resize(length float64) *StraightLine {
 	return &StraightLine{
 		Start: l.Start,
-		End:   l.Start.DrawAt(l.Angle(), length),
+		End:   l.Start.DrawAt(l.AngleAt(0.0), length),
 	}
+}
+
+func (l *StraightLine) String() string {
+	return fmt.Sprintf("[%v, %v]", l.Start, l.End)
 }
 
 func (l *StraightLine) Move(x, y float64) *StraightLine {
@@ -45,4 +48,17 @@ func (l *StraightLine) Move(x, y float64) *StraightLine {
 
 func (l *StraightLine) BoundingBox() *BoundingBox {
 	return CollectiveBoundingBox(l.Start, l.End)
+}
+
+func (l *StraightLine) Length() float64 {
+	return l.Start.DistanceTo(l.End)
+}
+
+func (l *StraightLine) PointAt(dist float64) *Point {
+	ratio := dist / l.Length()
+
+	return &Point{
+		X: l.Start.X + ratio * (l.End.X - l.Start.X),
+		Y: l.Start.Y + ratio * (l.End.Y - l.Start.Y),
+	}
 }

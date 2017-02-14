@@ -56,24 +56,24 @@ func (p *PN3Yoke) StitchLayer() *geometry.Block {
 
 	frontSeam := &geometry.StraightLine{
 		Start: p.anchors["5"],
-		End: p.anchors["6"],
+		End:   p.anchors["6"],
 	}
 
 	backSeam := &geometry.StraightLine{
 		Start: p.anchors["0"],
-		End: p.anchors["2"],
+		End:   p.anchors["2"],
 	}
 
 	neckLine := &geometry.EllipseCurve{
-		Start: p.anchors["1"],
-		End: p.anchors["5"],
-		StartingAngle: math.Pi * (3.0 / 2.0),
-		ArcAngle: math.Pi * (3.0 / 8.0),
+		Start:         p.anchors["1"],
+		End:           p.anchors["5"],
+		StartingAngle: &geometry.Angle{Rads: math.Pi * (3.0 / 2.0)},
+		ArcAngle:      &geometry.Angle{Rads: math.Pi * (3.0 / 8.0)},
 	}
 
 	scyeSeam := &geometry.StraightLine{
 		Start: p.anchors["2"],
-		End: p.anchors["6"],
+		End:   p.anchors["6"],
 	}
 
 	layer := &geometry.Block{}
@@ -95,7 +95,7 @@ func (p *PN3Yoke) CutLayer() *geometry.Block {
 
 	centreBack := &geometry.StraightLine{
 		Start: p.anchors["0"],
-		End: p.anchors["1"],
+		End:   p.anchors["1"],
 	}
 
 	layer := &geometry.Block{}
@@ -103,7 +103,6 @@ func (p *PN3Yoke) CutLayer() *geometry.Block {
 
 	return layer
 }
-
 
 func (p *PN3Yoke) NotationLayer() *geometry.Block {
 	err := p.populateAnchors()
@@ -118,4 +117,3 @@ func (p *PN3Yoke) NotationLayer() *geometry.Block {
 
 	return layer
 }
-
