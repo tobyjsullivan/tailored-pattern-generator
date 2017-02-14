@@ -118,12 +118,19 @@ func (c *ParabolaCurve) StraightLines() []*StraightLine {
 }
 
 func (c *ParabolaCurve) BoundingBox() *BoundingBox {
-	ls := c.StraightLines()
-	lines := make([]BoundedShape, 0, len(ls))
-	for _, l := range ls {
-		lines = append(lines, l)
-	}
-	return CollectiveBoundingBox(lines...)
+	return boundingBoxOfLine(c)
+}
+
+func (c *ParabolaCurve) Length() float64 {
+	return lengthOfLine(c)
+}
+
+func (c *ParabolaCurve) PointAt(dist float64) *Point {
+	return pointOnLine(c, dist)
+}
+
+func (c *ParabolaCurve) AngleAt(dist float64) *Angle {
+	return angleAtPointOnLine(c, dist)
 }
 
 func rotateStraightLineAboutPoint(origin *Point, l *StraightLine, ang float64) *StraightLine {
