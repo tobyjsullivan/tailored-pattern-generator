@@ -2,7 +2,6 @@ package geometry
 
 import (
 	"math"
-	"fmt"
 )
 
 type ThreePointCurve struct {
@@ -101,20 +100,9 @@ func (c *ThreePointCurve) StraightLines() []*StraightLine {
 
 	pieces := 20
 
-	fmt.Printf("x0 is %.2f\n", c.x0())
-	fmt.Printf("y0 is %.2f\n", c.y0())
 	x1 := c.x1()
-	fmt.Printf("x1 is %.2f\n", x1)
-	fmt.Printf("y1 is %.2f\n", c.y1())
-	fmt.Printf("x2 is %.2f\n", c.x2())
-	fmt.Printf("y2 is %.2f\n", c.y2())
-
 	h1 := c.h1()
 	h2 := c.h2()
-	fmt.Printf("h1 is %.2f\n", h1)
-	fmt.Printf("h2 is %.2f\n", h2)
-	fmt.Printf("a1 is %.2f\n", c.a1())
-	fmt.Printf("a2 is %.2f\n", c.a2())
 
 	out := make([]*StraightLine, 2, (2*pieces) + 2)
 
