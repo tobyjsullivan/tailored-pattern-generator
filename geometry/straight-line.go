@@ -1,7 +1,6 @@
 package geometry
 
 import (
-	"math"
 	"fmt"
 )
 
@@ -15,17 +14,7 @@ func (l *StraightLine) StraightLines() []*StraightLine {
 }
 
 func (l *StraightLine) AngleAt(_ float64) *Angle {
-	run := (l.End.X - l.Start.X)
-
-	angle := math.Atan((l.End.Y - l.Start.Y) / run)
-
-	if run < 0.0 {
-		angle += math.Pi
-	}
-
-	return &Angle{
-		Rads: angle,
-	}
+	return l.End.AngleRelativeTo(l.Start)
 }
 
 func (l *StraightLine) Resize(length float64) *StraightLine {
@@ -67,5 +56,12 @@ func (l *StraightLine) Reverse() *StraightLine {
 	return &StraightLine{
 		Start: l.End,
 		End: l.Start,
+	}
+}
+
+func (l *StraightLine) RotateAround(o *Point, a *Angle) *StraightLine {
+	return &StraightLine{
+		Start: l.Start.RotateAround(o, a),
+		End: l.End.RotateAround(o, a),
 	}
 }

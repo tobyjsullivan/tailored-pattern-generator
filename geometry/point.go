@@ -77,3 +77,17 @@ func (p *Point) BoundingBox() *BoundingBox {
 		Bottom: p.Y,
 	}
 }
+
+func (p *Point) AngleRelativeTo(o *Point) *Angle {
+	return &Angle{
+		Rads: math.Atan2(p.Y - o.Y, p.X - o.X),
+	}
+}
+
+func (p *Point) RotateAround(o *Point, a *Angle) *Point {
+	r := p.DistanceTo(o)
+
+	newAngle := p.AngleRelativeTo(o).Add(a)
+
+	return o.DrawAt(newAngle, r)
+}

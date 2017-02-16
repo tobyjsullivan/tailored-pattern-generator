@@ -9,6 +9,7 @@ type ThreePointCurve struct {
 	Start *Point
 	Middle *Point
 	End *Point
+	Rotation *Angle
 }
 
 func (c *ThreePointCurve) x0() float64 {
@@ -75,7 +76,29 @@ func (c *ThreePointCurve) g(x float64) float64 {
 	return c.a2() * math.Pow(x - c.h2(), 2.0) + c.y2()
 }
 
+func (c *ThreePointCurve) rotatedStraightLines() []*StraightLine {
+	normalized := &ThreePointCurve{
+		Start: c.Start,
+		Middle: c.Middle.RotateAround(c.Start, c.Rotation.Neg()),
+		End: c.End.RotateAround(c.Start, c.Rotation.Neg()),
+	}
+
+	normLines := normalized.StraightLines()
+
+	outLines := make([]*StraightLine, 0, len(normLines))
+
+	for _, l := range normLines {
+		outLines = append(outLines, l.RotateAround(c.Start, c.Rotation))
+	}
+
+	return outLines
+}
+
 func (c *ThreePointCurve) StraightLines() []*StraightLine {
+	if c.Rotation != nil && c.Rotation.Radians() != 0.0 {
+		return c.rotatedStraightLines()
+	}
+
 	pieces := 20
 
 	fmt.Printf("x0 is %.2f\n", c.x0())
@@ -93,25 +116,22 @@ func (c *ThreePointCurve) StraightLines() []*StraightLine {
 	fmt.Printf("a1 is %.2f\n", c.a1())
 	fmt.Printf("a2 is %.2f\n", c.a2())
 
+	out := make([]*StraightLine, 2, (2*pieces) + 2)
+
 	// Draw the initial tangent line
-	startLine := &StraightLine{
+	out[0] = &StraightLine{
 		Start: c.Start,
 		End: &Point{
 			X: h1,
 			Y: c.Start.Y,
 		},
 	}
-	endLine := &StraightLine{
+	out[1] = &StraightLine{
 		Start: c.End,
 		End: &Point{
 			X: h2,
 			Y: c.End.Y,
 		},
-	}
-
-	out := []*StraightLine{
-		startLine,
-		endLine,
 	}
 
 	// Draw f(x)
