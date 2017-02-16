@@ -14,21 +14,7 @@ type Piece interface {
 	Details() *Details
 }
 
-func addAnchors(b *geometry.Block, anchors map[string]*geometry.Point) {
-	for k, p := range anchors {
-		addAnchor(b, k, p)
-	}
-}
-
-func addAnchor(b *geometry.Block, label string, p *geometry.Point) {
-	b.AddPoint(p)
-	b.AddText(&geometry.Text{
-		Content:  label,
-		Position: p.Move(-1.5, -1.0),
-	})
-}
-
-func addSeamAllowance(l geometry.Line, opposite bool) geometry.Line {
+func AddSeamAllowance(l geometry.Line, opposite bool) geometry.Line {
 	numPieces := 20
 	segmentLength := l.Length() / float64(numPieces)
 
@@ -60,7 +46,7 @@ func addSeamAllowance(l geometry.Line, opposite bool) geometry.Line {
 	return result
 }
 
-func notch(l geometry.Line, dist float64) geometry.Line {
+func Notch(l geometry.Line, dist float64) geometry.Line {
 	p := l.PointAt(dist)
 
 	s := p.DrawAt(l.AngleAt(dist).Perpendicular(), SEAM_ALLOWANCE / 2.0)
