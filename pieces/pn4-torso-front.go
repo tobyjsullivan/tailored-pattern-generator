@@ -115,22 +115,27 @@ func (p *PN4TorsoFront) shoulderStitch() geometry.Line {
 	}
 }
 
-func (p *PN4TorsoFront) armholeTopStitch() geometry.Line {
-	return &geometry.EllipseCurve{
+func (p *PN4TorsoFront) armholeStitch() geometry.Line {
+	top := &geometry.EllipseCurve{
 		Start:         p.s(),
 		End:           p.r(),
 		StartingAngle: &geometry.Angle{Rads: 0.0},
 		ArcAngle:      &geometry.Angle{Rads: math.Pi / 8.0},
 	}
-}
-
-func (p *PN4TorsoFront) armholeBottomStitch() geometry.Line {
-	return &geometry.EllipseCurve{
+	bottom := &geometry.EllipseCurve{
 		Start:         p.s(),
 		End:           p.c(),
 		StartingAngle: &geometry.Angle{Rads: math.Pi},
 		ArcAngle:      &geometry.Angle{Rads: math.Pi * (2.0 / 5.0)},
 	}
+
+	armhole := &geometry.Polyline{}
+	armhole.AddLine(
+		&geometry.ReverseLine{InnerLine: top},
+		bottom,
+	)
+
+	return armhole
 }
 
 func (p *PN4TorsoFront) sideSeamAStitch() geometry.Line {
@@ -169,23 +174,23 @@ func (p *PN4TorsoFront) hemlineStitch() geometry.Line {
 	}
 }
 
+func (p *PN4TorsoFront) centreFront() geometry.Line {
+	return &geometry.StraightLine{Start: p.l(), End: p.k()}
+}
+
 func (p *PN4TorsoFront) CutLayer() *geometry.Block {
 	layer := &geometry.Block{}
 
-	centreFront := &geometry.StraightLine{Start: p.l(), End: p.k()}
-
-	armholeTop := addSeamAllowance(p.armholeTopStitch(), false)
-	armholeBottom := addSeamAllowance(p.armholeBottomStitch(), true)
+	armholeCut := addSeamAllowance(p.armholeStitch(), true)
 
 	layer.AddLine(
-		centreFront,
+		p.centreFront(),
 		addSeamAllowance(p.necklineStitch(), true),
 		addSeamAllowance(p.shoulderStitch(), true),
-		armholeTop,
-		notch(armholeTop, 7.6),
-		armholeBottom,
-		notch(armholeBottom, 7.6),
-		notch(armholeBottom, 8.9),
+		armholeCut,
+		notch(armholeCut, 7.6),
+		notch(armholeCut, armholeCut.Length() - 7.6),
+		notch(armholeCut, armholeCut.Length() - 8.9),
 		addSeamAllowance(p.sideSeamAStitch(), false),
 		addSeamAllowance(p.sideSeamBStitch(), false),
 		addSeamAllowance(p.sideSeamCStitch(), true),
@@ -201,8 +206,7 @@ func (p *PN4TorsoFront) StitchLayer() *geometry.Block {
 	layer.AddLine(
 		p.necklineStitch(),
 		p.shoulderStitch(),
-		p.armholeTopStitch(),
-		p.armholeBottomStitch(),
+		p.armholeStitch(),
 		p.sideSeamAStitch(),
 		p.sideSeamBStitch(),
 		p.sideSeamCStitch(),

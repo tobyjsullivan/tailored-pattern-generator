@@ -24,6 +24,8 @@ func (p *Polyline) AngleAt(dist float64) *Angle {
 	return angleAtPointOnLine(p, dist)
 }
 
-func (p *Polyline) AddLine(l ...*StraightLine) {
-	p.Lines = append(p.Lines, l...)
+func (p *Polyline) AddLine(ls ...Line) {
+	for _, l := range ls {
+		p.Lines = append(p.Lines, l.StraightLines()...)
+	}
 }

@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	//sample42In := &pieces.Measurements{
+	//measurements := &pieces.Measurements{
 	//	ChestCircumference: 106.7, // 42"
 	//	WaistCircumference: 91.4, // 36"
 	//	HipCircumference: 109.2, // 43"
@@ -16,7 +16,7 @@ func main() {
 	//	Height: 182.9, // 72"
 	//}
 
-	personal := &pieces.Measurements{
+	measurements := &pieces.Measurements{
 		ChestCircumference: 110.0,
 		WaistCircumference: 96.5,
 		HipCircumference: 110.5,
@@ -25,8 +25,7 @@ func main() {
 	}
 
 	style := &styles.SN11001Shirt{
-		//Measurements: sample42In,
-		Measurements: personal,
+		Measurements: measurements,
 	}
 
 	fmt.Println("Generating DXF...")
