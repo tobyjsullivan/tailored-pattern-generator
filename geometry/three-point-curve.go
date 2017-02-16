@@ -99,12 +99,28 @@ func (c *ThreePointCurve) StraightLines() []*StraightLine {
 		return c.rotatedStraightLines()
 	}
 
-	if c.Middle.Y >= c.Start.Y && c.Middle.Y >= c.End.Y {
-		fmt.Println("Middle is outlier above!")
-	}
+	if c.Middle.Y <= c.Start.Y && c.Middle.Y <= c.End.Y ||
+			c.Middle.Y >= c.Start.Y && c.Middle.Y >= c.End.Y{
+		fmt.Println("Middle is outlier!")
 
-	if c.Middle.Y <= c.Start.Y && c.Middle.Y <= c.End.Y {
-		fmt.Println("Middle is outlier below!")
+		section1 := &ThreePointCurve{
+			Start: c.Start,
+			Middle: c.Start.MidpointTo(c.Middle),
+			End: c.Middle,
+		}
+
+		section2 := &ThreePointCurve{
+			Start: c.Middle,
+			Middle: c.Middle.MidpointTo(c.End),
+			End: c.End,
+		}
+
+		lines := []*StraightLine{}
+
+		lines = append(lines, section1.StraightLines()...)
+		lines = append(lines, section2.StraightLines()...)
+
+		return lines
 	}
 
 	if c.Start.Y == c.Middle.Y || c.Middle.Y == c.End.Y {
