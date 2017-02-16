@@ -117,21 +117,14 @@ func (p *PN5TorsoBack) StitchLayer() *geometry.Block {
 		ArcAngle:      &geometry.Angle{Rads: math.Pi / 8.0},
 	}
 
-	sideSeamB := &geometry.EllipseCurve{
-		Start:         p.anchors["E"],
-		End:           p.anchors["G"],
-		StartingAngle: &geometry.Angle{Rads: math.Pi},
-		ArcAngle:      &geometry.Angle{Rads: math.Pi / 16.0},
+	sideSeamB := &geometry.ThreePointCurve{
+		Start: p.anchors["J"],
+		Middle: p.anchors["G"],
+		End: p.anchors["E"],
+		Rotation: &geometry.Angle{Rads: math.Pi / 2.0},
 	}
 
-	sideSeamC := &geometry.EllipseCurve{
-		Start:         p.anchors["J"],
-		End:           p.anchors["G"],
-		StartingAngle: &geometry.Angle{Rads: 0.0},
-		ArcAngle:      &geometry.Angle{Rads: math.Pi / 16.0},
-	}
-
-	sideSeamD := &geometry.StraightLine{
+	sideSeamC := &geometry.StraightLine{
 		Start: p.anchors["J"],
 		End:   p.anchors["I"],
 	}
@@ -157,7 +150,6 @@ func (p *PN5TorsoBack) StitchLayer() *geometry.Block {
 		sideSeamA,
 		sideSeamB,
 		sideSeamC,
-		sideSeamD,
 		hemLineA,
 		hemLineB,
 	)

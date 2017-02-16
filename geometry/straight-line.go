@@ -44,6 +44,10 @@ func (l *StraightLine) Length() float64 {
 }
 
 func (l *StraightLine) PointAt(dist float64) *Point {
+	if l.Length() == 0.0 {
+		return l.Start
+	}
+
 	ratio := dist / l.Length()
 
 	return &Point{

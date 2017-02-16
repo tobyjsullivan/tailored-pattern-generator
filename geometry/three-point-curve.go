@@ -2,6 +2,7 @@ package geometry
 
 import (
 	"math"
+	"fmt"
 )
 
 type ThreePointCurve struct {
@@ -98,28 +99,36 @@ func (c *ThreePointCurve) StraightLines() []*StraightLine {
 		return c.rotatedStraightLines()
 	}
 
+	if c.Middle.Y >= c.Start.Y && c.Middle.Y >= c.End.Y {
+		fmt.Println("Middle is outlier above!")
+	}
+
+	if c.Middle.Y <= c.Start.Y && c.Middle.Y <= c.End.Y {
+		fmt.Println("Middle is outlier below!")
+	}
+
+	if c.Start.Y == c.Middle.Y || c.Middle.Y == c.End.Y {
+		fmt.Println("Equal Y's detected!")
+	}
+
 	pieces := 20
 
 	x1 := c.x1()
 	h1 := c.h1()
 	h2 := c.h2()
 
-	out := make([]*StraightLine, 2, (2*pieces) + 2)
+	out := make([]*StraightLine, 0, (2*pieces) + 1)
 
 	// Draw the initial tangent line
-	out[0] = &StraightLine{
-		Start: c.Start,
-		End: &Point{
-			X: h1,
-			Y: c.Start.Y,
-		},
-	}
-	out[1] = &StraightLine{
-		Start: c.End,
-		End: &Point{
-			X: h2,
-			Y: c.End.Y,
-		},
+
+	if h1 != c.Start.X {
+		out = append(out, &StraightLine{
+			Start: c.Start,
+			End: &Point{
+				X: h1,
+				Y: c.Start.Y,
+			},
+		})
 	}
 
 	// Draw f(x)
@@ -129,6 +138,16 @@ func (c *ThreePointCurve) StraightLines() []*StraightLine {
 	// Draw g(x)
 	gLines := drawStraightLines(x1, h2, c.g, pieces)
 	out = append(out, gLines...)
+
+	if h2 != c.End.X {
+		out = append(out, &StraightLine{
+			Start: &Point{
+				X: h2,
+				Y: c.End.Y,
+			},
+			End: c.End,
+		})
+	}
 
 	return out
 }

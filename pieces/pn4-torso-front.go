@@ -143,24 +143,15 @@ func (p *PN4TorsoFront) sideSeamAStitch() geometry.Line {
 }
 
 func (p *PN4TorsoFront) sideSeamBStitch() geometry.Line {
-	return &geometry.EllipseCurve{
-		Start:         p.e(),
-		End:           p.g(),
-		StartingAngle: &geometry.Angle{Rads: math.Pi},
-		ArcAngle:      &geometry.Angle{Rads: math.Pi / 8.0},
+	return &geometry.ThreePointCurve{
+		Start: p.j(),
+		Middle: p.g(),
+		End: p.e(),
+		Rotation: &geometry.Angle{Rads: math.Pi / 2.0},
 	}
 }
 
 func (p *PN4TorsoFront) sideSeamCStitch() geometry.Line {
-	return &geometry.EllipseCurve{
-		Start:         p.j(),
-		End:           p.g(),
-		StartingAngle: &geometry.Angle{Rads: 0.0},
-		ArcAngle:      &geometry.Angle{Rads: math.Pi / 8.0},
-	}
-}
-
-func (p *PN4TorsoFront) sideSeamDStitch() geometry.Line {
 	return &geometry.StraightLine{
 		Start: p.j(),
 		End:   p.i(),
@@ -196,9 +187,8 @@ func (p *PN4TorsoFront) CutLayer() *geometry.Block {
 		notch(armholeBottom, 7.6),
 		notch(armholeBottom, 8.9),
 		addSeamAllowance(p.sideSeamAStitch(), false),
-		addSeamAllowance(p.sideSeamBStitch(), true),
-		addSeamAllowance(p.sideSeamCStitch(), false),
-		addSeamAllowance(p.sideSeamDStitch(), true),
+		addSeamAllowance(p.sideSeamBStitch(), false),
+		addSeamAllowance(p.sideSeamCStitch(), true),
 		addSeamAllowance(p.hemlineStitch(), false),
 	)
 
@@ -216,7 +206,6 @@ func (p *PN4TorsoFront) StitchLayer() *geometry.Block {
 		p.sideSeamAStitch(),
 		p.sideSeamBStitch(),
 		p.sideSeamCStitch(),
-		p.sideSeamDStitch(),
 		p.hemlineStitch(),
 	)
 
