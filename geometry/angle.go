@@ -40,6 +40,12 @@ func (a *Angle) Opposite() *Angle {
 	}
 }
 
+func (a *Angle) Neg() *Angle {
+	return &Angle{
+		Rads: -a.Rads,
+	}
+}
+
 func (a *Angle) Add(other *Angle) *Angle {
 	return &Angle{
 		Rads: a.Rads + other.Rads,

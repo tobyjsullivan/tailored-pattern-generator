@@ -11,6 +11,7 @@ type SN11001Shirt struct {
 
 func (p *SN11001Shirt) Pieces() []pieces.Piece {
 	return []pieces.Piece{
+		&pieces.PN0TestPiece{},
 		&pieces.PN4TorsoFront{
 			Measurements: p.Measurements,
 		},

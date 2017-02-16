@@ -49,10 +49,12 @@ func addSeamAllowance(l geometry.Line, opposite bool) geometry.Line {
 		sPoint := l.PointAt(s).DrawAt(sAngle, SEAM_ALLOWANCE)
 		ePoint := l.PointAt(e).DrawAt(eAngle, SEAM_ALLOWANCE)
 
-		result.AddLine(&geometry.StraightLine{
+		line := &geometry.StraightLine{
 			Start: sPoint,
 			End: ePoint,
-		})
+		}
+
+		result.AddLine(line)
 	}
 
 	return result
