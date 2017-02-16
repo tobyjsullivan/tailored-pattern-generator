@@ -7,7 +7,6 @@ import (
 
 type PN6Yoke struct {
 	*Measurements
-	anchors map[string]*geometry.Point
 }
 
 func (p *PN6Yoke) Details() *Details {
@@ -21,98 +20,115 @@ func (p *PN6Yoke) OnFold() bool {
 	return true
 }
 
-func (p *PN6Yoke) populateAnchors() error {
-	if p.anchors != nil {
-		return nil
-	}
+func (p *PN6Yoke) a() *geometry.Point {
+	return &geometry.Point{X: 0.0, Y: 0.0}
+}
 
-	a := make(map[string]*geometry.Point)
+func (p *PN6Yoke) b() *geometry.Point {
+	return p.a().SquareDown(9.5)
+}
 
-	a["A"] = &geometry.Point{X: 0.0, Y: 0.0}
-	a["B"] = a["A"].SquareDown(9.5)
-	a["C"] = a["B"].SquareRight(p.ChestCircumference/6.0 + 6.2)
-	a["D"] = a["C"].SquareToHorizontalLine(a["A"].Y)
-	a["E"] = a["A"].SquareRight(p.NeckCircumference/8.0 + 3.7)
-	a["F"] = a["E"].SquareUp(a["A"].DistanceTo(a["E"])/2.0 + 0.3)
-	a["G"] = (&geometry.StraightLine{Start: a["F"], End: a["D"]}).Resize(p.shoulderSeamLength()).End
+func (p *PN6Yoke) c() *geometry.Point {
+	return p.b().SquareRight(p.ChestCircumference/6.0 + 6.2)
+}
 
-	p.anchors = a
+func (p *PN6Yoke) d() *geometry.Point {
+	return p.c().SquareToHorizontalLine(p.a().Y)
+}
 
-	return nil
+func (p *PN6Yoke) e() *geometry.Point {
+	return p.a().SquareRight(p.NeckCircumference/8.0 + 3.7)
+}
+
+func (p *PN6Yoke) f() *geometry.Point {
+	e := p.e()
+	return e.SquareUp(p.a().DistanceTo(e)/2.0 + 0.3)
+}
+
+func (p *PN6Yoke) g() *geometry.Point {
+	return  (&geometry.StraightLine{Start: p.f(), End: p.d()}).Resize(p.shoulderSeamLength()).End
 }
 
 func (p *PN6Yoke) shoulderSeamLength() float64 {
 	return (&PN4TorsoFront{Measurements: p.Measurements}).shoulderStitch().Length()
 }
 
-func (p *PN6Yoke) StitchLayer() *geometry.Block {
-	err := p.populateAnchors()
-	if err != nil {
-		panic(err)
-	}
-
-	neckLine := &geometry.EllipseCurve{
-		Start:         p.anchors["A"],
-		End:           p.anchors["F"],
+func (p *PN6Yoke) necklineStitch() geometry.Line {
+	return &geometry.EllipseCurve{
+		Start:         p.a(),
+		End:           p.f(),
 		StartingAngle: &geometry.Angle{Rads: math.Pi * (3.0 / 2.0)},
 		ArcAngle:      &geometry.Angle{Rads: math.Pi * (7.0 / 16.0)},
 	}
+}
 
-	shoulderSeam := &geometry.StraightLine{
-		Start: p.anchors["F"],
-		End:   p.anchors["G"],
+func (p *PN6Yoke) frontStitch() geometry.Line {
+	return &geometry.StraightLine{
+		Start: p.f(),
+		End:   p.g(),
 	}
+}
 
-	armscye := &geometry.StraightLine{
-		Start: p.anchors["G"],
-		End:   p.anchors["C"],
+func (p *PN6Yoke) armscyeStitch() geometry.Line {
+	return &geometry.StraightLine{
+		Start: p.g(),
+		End:   p.c(),
 	}
+}
 
-	backSeam := &geometry.StraightLine{
-		Start: p.anchors["B"],
-		End:   p.anchors["C"],
+func (p *PN6Yoke) backStitch() geometry.Line {
+	return &geometry.StraightLine{
+		Start: p.b(),
+		End:   p.c(),
 	}
+}
+
+func (p *PN6Yoke) centreBack() geometry.Line {
+	return &geometry.StraightLine{
+		Start: p.a(),
+		End:   p.b(),
+	}
+}
+
+func (p *PN6Yoke) StitchLayer() *geometry.Block {
 
 	layer := &geometry.Block{}
 	layer.AddLine(
-		neckLine,
-		shoulderSeam,
-		armscye,
-		backSeam,
+		p.necklineStitch(),
+		p.frontStitch(),
+		p.armscyeStitch(),
+		p.backStitch(),
 	)
 
 	return layer
 }
 
 func (p *PN6Yoke) CutLayer() *geometry.Block {
-	err := p.populateAnchors()
-	if err != nil {
-		panic(err)
-	}
-
-	centreBack := &geometry.StraightLine{
-		Start: p.anchors["A"],
-		End:   p.anchors["B"],
-	}
-
 	layer := &geometry.Block{}
 	layer.AddLine(
-		centreBack,
+		p.centreBack(),
+		addSeamAllowance(p.necklineStitch(), false),
+		addSeamAllowance(p.frontStitch(), false),
+		addSeamAllowance(p.armscyeStitch(), false),
+		addSeamAllowance(p.backStitch(), true),
 	)
 
 	return layer
 }
 
 func (p *PN6Yoke) NotationLayer() *geometry.Block {
-	err := p.populateAnchors()
-	if err != nil {
-		panic(err)
-	}
-
 	layer := &geometry.Block{}
 
 	// Draw all points (DEBUG)
-	addAnchors(layer, p.anchors)
+	anchors := make(map[string]*geometry.Point)
+	anchors["A"] = p.a()
+	anchors["B"] = p.b()
+	anchors["C"] = p.c()
+	anchors["D"] = p.d()
+	anchors["E"] = p.e()
+	anchors["F"] = p.f()
+	anchors["G"] = p.g()
+	addAnchors(layer, anchors)
 
 	return layer
 }
