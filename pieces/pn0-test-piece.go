@@ -30,6 +30,23 @@ func (p *PN0TestPiece) populateAnchors() error {
 	a["B"] = a["A"].SquareUp(20.0)
 	a["C"] = a["B"].SquareRight(50.0).SquareUp(10.0)
 
+	a["E"] = &geometry.Point{X: 1, Y: 3}
+	a["F"] = &geometry.Point{X: 12, Y: 6}
+	a["G"] = &geometry.Point{X: 17, Y: 9}
+
+	a["H"] = &geometry.Point{X: 12, Y: 4}
+
+	a["I"] = &geometry.Point{X: 12, Y: 0}
+	a["J"] = &geometry.Point{X: 17, Y: -3}
+
+	a["K"] = &geometry.Point{X: 6, Y: 6}
+
+	a["L"] = &geometry.Point{X: 9, Y: 6}
+	a["M"] = &geometry.Point{X: 6, Y: 0}
+
+	a["N"] = &geometry.Point{X: -6, Y: 19}
+	a["O"] = a["E"].MidpointTo(a["N"]).SquareUp(2.0)
+	a["P"] = a["E"].MidpointTo(a["N"]).SquareDown(2.0)
 
 	a["Z"] = a["A"].Move(100.0, 100.0)
 
@@ -53,16 +70,66 @@ func (p *PN0TestPiece) CutLayer() *geometry.Block {
 		panic(err)
 	}
 
-	parabolaA := &geometry.ParabolaCurve{
-		Start: p.anchors["B"],
-		End: p.anchors["C"],
-		StartingAngle: 0.0,
-		ArcAngle: math.Pi / 16.0,
+	threePointCurveA := &geometry.ThreePointCurve{
+		Start: p.anchors["E"],
+		Middle: p.anchors["F"],
+		End: p.anchors["G"],
+	}
+
+	threePointCurveB := &geometry.ThreePointCurve{
+		Start: p.anchors["E"],
+		Middle: p.anchors["H"],
+		End: p.anchors["G"],
+	}
+
+	threePointCurveC := &geometry.ThreePointCurve{
+		Start: p.anchors["E"],
+		Middle: p.anchors["I"],
+		End: p.anchors["J"],
+	}
+
+	threePointCurveD := &geometry.ThreePointCurve{
+		Start: p.anchors["E"],
+		Middle: p.anchors["K"],
+		End: p.anchors["G"],
+	}
+
+	threePointCurveE := &geometry.ThreePointCurve{
+		Start: p.anchors["E"],
+		Middle: p.anchors["L"],
+		End: p.anchors["G"],
+	}
+
+	threePointCurveF := &geometry.ThreePointCurve{
+		Start: p.anchors["E"],
+		Middle: p.anchors["M"],
+		End: p.anchors["J"],
+	}
+
+	threePointCurveG := &geometry.ThreePointCurve{
+		Start: p.anchors["E"],
+		Middle: p.anchors["O"],
+		End: p.anchors["N"],
+		Rotation: &geometry.Angle{Rads: math.Pi / 2.0},
+	}
+
+	threePointCurveH := &geometry.ThreePointCurve{
+		Start: p.anchors["E"],
+		Middle: p.anchors["P"],
+		End: p.anchors["N"],
+		Rotation: &geometry.Angle{Rads: math.Pi / 2.0},
 	}
 
 	layer := &geometry.Block{}
 	layer.AddLine(
-		parabolaA,
+		threePointCurveA,
+		threePointCurveB,
+		threePointCurveC,
+		threePointCurveD,
+		threePointCurveE,
+		threePointCurveF,
+		threePointCurveG,
+		threePointCurveH,
 	)
 
 	return layer
