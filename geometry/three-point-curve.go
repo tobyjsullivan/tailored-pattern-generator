@@ -36,23 +36,43 @@ func (c *ThreePointCurve) y2() float64 {
 }
 
 func (c *ThreePointCurve) a2() float64 {
-	return (c.y1() - c.y2()) / math.Pow(c.x1() - c.x2(), 2.0)
+	return (c.y1() - c.y2()) / math.Pow(c.x1() - c.h2(), 2.0)
 }
 
-func (c *ThreePointCurve) h() float64 {
+func (c *ThreePointCurve) m1() float64 {
+	return (c.y1() - c.y0()) / (c.x1() - c.x0())
+}
+
+func (c *ThreePointCurve) m2() float64 {
+	return (c.y2() - c.y1()) / (c.x2() - c.x1())
+}
+
+func (c *ThreePointCurve) h1() float64 {
+	if math.Abs(c.m1()) > math.Abs(c.m2()) {
+		return c.x0()
+	}
+
 	return c.x1() - (c.y1() - c.y0()) * (c.x1() - c.x2()) / (c.y1() - c.y2())
 }
 
+func (c *ThreePointCurve) h2() float64 {
+	if math.Abs(c.m1()) < math.Abs(c.m2()) {
+		return c.x2()
+	}
+
+	return c.x1() - (c.y1() - c.y2()) * (c.x1() - c.x0()) / (c.y1() - c.y0())
+}
+
 func (c *ThreePointCurve) a1() float64 {
-	return (c.y1() - c.y0()) / math.Pow(c.x1() - c.h(), 2.0)
+	return (c.y1() - c.y0()) / math.Pow(c.x1() - c.h1(), 2.0)
 }
 
 func (c *ThreePointCurve) f(x float64) float64 {
-	return c.a1() * math.Pow(x - c.h(), 2.0) + c.y0()
+	return c.a1() * math.Pow(x - c.h1(), 2.0) + c.y0()
 }
 
 func (c *ThreePointCurve) g(x float64) float64 {
-	return c.a2() * math.Pow(x - c.x2(), 2.0) + c.y2()
+	return c.a2() * math.Pow(x - c.h2(), 2.0) + c.y2()
 }
 
 func (c *ThreePointCurve) StraightLines() []*StraightLine {
@@ -66,8 +86,10 @@ func (c *ThreePointCurve) StraightLines() []*StraightLine {
 	fmt.Printf("x2 is %.2f\n", c.x2())
 	fmt.Printf("y2 is %.2f\n", c.y2())
 
-	h := c.h()
-	fmt.Printf("h is %.2f\n", h)
+	h1 := c.h1()
+	h2 := c.h2()
+	fmt.Printf("h1 is %.2f\n", h1)
+	fmt.Printf("h2 is %.2f\n", h2)
 	fmt.Printf("a1 is %.2f\n", c.a1())
 	fmt.Printf("a2 is %.2f\n", c.a2())
 
@@ -75,20 +97,29 @@ func (c *ThreePointCurve) StraightLines() []*StraightLine {
 	startLine := &StraightLine{
 		Start: c.Start,
 		End: &Point{
-			X: h,
+			X: h1,
 			Y: c.Start.Y,
 		},
 	}
+	endLine := &StraightLine{
+		Start: c.End,
+		End: &Point{
+			X: h2,
+			Y: c.End.Y,
+		},
+	}
+
 	out := []*StraightLine{
 		startLine,
+		endLine,
 	}
 
 	// Draw f(x)
-	fLines := drawStraightLines(h, x1, c.f, pieces)
+	fLines := drawStraightLines(h1, x1, c.f, pieces)
 	out = append(out, fLines...)
 
 	// Draw g(x)
-	gLines := drawStraightLines(x1, c.x2(), c.g, pieces)
+	gLines := drawStraightLines(x1, h2, c.g, pieces)
 	out = append(out, gLines...)
 
 	return out
