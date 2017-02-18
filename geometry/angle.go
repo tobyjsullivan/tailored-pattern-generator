@@ -78,6 +78,10 @@ func (a *Angle) Cos() float64 {
 	return math.Cos(a.Radians())
 }
 
+func (a *Angle) Tan() float64 {
+	return math.Tan(a.Radians())
+}
+
 func (a *Angle) String() string {
 	measure := fmt.Sprintf("%.2f", a.Rads)
 
