@@ -85,7 +85,7 @@ func (pf *PatternFile) DrawPattern(s styles.Style) error {
 				fmt.Sprintf("Chest: %.1f cm", details.Measurements.ChestCircumference),
 				fmt.Sprintf("Waist: %.1f cm", details.Measurements.WaistCircumference),
 				fmt.Sprintf("Hip: %.1f cm", details.Measurements.HipCircumference),
-				fmt.Sprintf("Arm Length: %.1f cm", details.Measurements.ArmLength),
+				fmt.Sprintf("Sleeve Length: %.1f cm", details.Measurements.SleeveLength),
 			}...)
 		}
 
