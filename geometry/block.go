@@ -65,11 +65,14 @@ func (b *Block) Move(x, y float64) *Block {
 }
 
 func (b *Block) BoundingBox() *BoundingBox {
-	children := make([]BoundedShape, 0, len(b.StraightLines) + len(b.Blocks) + len(b.Points))
+	children := make([]BoundedShape, 0, len(b.StraightLines) + len(b.Points) + len(b.Text) + len(b.Blocks))
 	for _, c := range b.StraightLines {
 		children = append(children, c)
 	}
 	for _, c := range b.Points {
+		children = append(children, c)
+	}
+	for _, c := range b.Text {
 		children = append(children, c)
 	}
 	for _, c := range b.Blocks {

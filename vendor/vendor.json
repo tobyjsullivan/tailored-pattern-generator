@@ -3,6 +3,24 @@
 	"ignore": "",
 	"package": [
 		{
+			"checksumSHA1": "n+6Kjpe0ydDfZt6s6jVcxtbin0c=",
+			"path": "github.com/jung-kurt/gofpdf",
+			"revision": "6ac7d2caee89cdfdb4f6c273a88d1173d234c21b",
+			"revisionTime": "2017-02-11T19:45:20Z"
+		},
+		{
+			"checksumSHA1": "tOyDtvvfAFCjWbvaxsSsaFJweL4=",
+			"path": "github.com/jung-kurt/gofpdf/internal/example",
+			"revision": "6ac7d2caee89cdfdb4f6c273a88d1173d234c21b",
+			"revisionTime": "2017-02-11T19:45:20Z"
+		},
+		{
+			"checksumSHA1": "AlrdgelCRv03a+PtfQBUyBsh70E=",
+			"path": "github.com/jung-kurt/gofpdf/internal/files",
+			"revision": "6ac7d2caee89cdfdb4f6c273a88d1173d234c21b",
+			"revisionTime": "2017-02-11T19:45:20Z"
+		},
+		{
 			"checksumSHA1": "a67ORKMzpbEGwKmZMMl+AtqaRb8=",
 			"path": "github.com/tobyjsullivan/dxf",
 			"revision": "060f6f95b2b1fb786d608f7b3c6e251d0d600a95",
