@@ -23,39 +23,38 @@ const (
 
 type PatternFile struct {
 	Style styles.Style
-	dxf drawing.Drawing
 }
 
 func (pf *PatternFile) SaveDXF(filepath string) error {
-	pf.dxf = drawing.NewDXF(MAX_WIDTH)
-	err := pf.DrawPattern(pf.Style)
+	dxf := drawing.NewDXF(MAX_WIDTH)
+	err := pf.DrawPattern(dxf, pf.Style)
 	if err != nil {
 		return err
 	}
 
-	return pf.dxf.SaveAs(filepath)
+	return dxf.SaveAs(filepath)
 }
 
 func (pf *PatternFile) SavePDF(filepath string) error {
-	pf.dxf = drawing.NewPDF(MAX_WIDTH)
-	err := pf.DrawPattern(pf.Style)
+	pdf := drawing.NewPDF(MAX_WIDTH)
+	err := pf.DrawPattern(pdf, pf.Style)
 	if err != nil {
 		return err
 	}
 
-	return pf.dxf.SaveAs(filepath)
+	return pdf.SaveAs(filepath)
 }
 
-func (d *PatternFile) SetLayer(layer string) error {
+func (pf *PatternFile) SetLayer(d drawing.Drawing, layer string) error {
 	var err error
 
 	switch layer {
 	case LAYER_CUT:
-		err = d.dxf.SetLayer(drawing.LAYER_NORMAL)
+		err = d.SetLayer(drawing.LAYER_NORMAL)
 	case LAYER_STITCH:
-		err = d.dxf.SetLayer(drawing.LAYER_ALT1)
+		err = d.SetLayer(drawing.LAYER_ALT1)
 	case LAYER_NOTATIONS:
-		err = d.dxf.SetLayer(drawing.LAYER_ALT2)
+		err = d.SetLayer(drawing.LAYER_ALT2)
 	default:
 		err = errors.New("The requested layer does not exist")
 	}
@@ -63,13 +62,14 @@ func (d *PatternFile) SetLayer(layer string) error {
 	return err
 }
 
-func (pf *PatternFile) DrawPattern(s styles.Style) error {
+func (pf *PatternFile) DrawPattern(d drawing.Drawing, s styles.Style) error {
 	var err error
 
-	err = pf.SetLayer(LAYER_CUT)
+	err = pf.SetLayer(d, LAYER_CUT)
 	if err != nil {
 		return err
 	}
+	startingY := 0.0
 	details := s.Details()
 	if details != nil {
 		lines := []string{
@@ -91,12 +91,14 @@ func (pf *PatternFile) DrawPattern(s styles.Style) error {
 		// Write style details just above the origin mark
 		detailPosition := &geometry.Point {
 			X: 0.0,
-			Y: float64(len(lines)) * LINE_SPACING + 2.0,
+			Y: -1.0,
 		}
-		err = pf.drawMultilineText(lines, detailPosition)
+		err = pf.drawMultilineText(d, lines, detailPosition)
 		if err != nil {
 			return err
 		}
+
+		startingY = -(float64(len(lines)) * LINE_SPACING + 2.0)
 	}
 
 	// Pieces on fold should be most left.
@@ -111,13 +113,13 @@ func (pf *PatternFile) DrawPattern(s styles.Style) error {
 	}
 
 	// Draw each piece
-	cornerX, cornerY := 0.0, 0.0
+	cornerX, cornerY := 0.0, startingY
 	j := 0
 	for i := 0; i < len(piecesOnFold); i++ {
 		// Draw first piece on fold
 		p := piecesOnFold[i]
 
-		pf.drawPiece(p, cornerX, cornerY)
+		pf.drawPiece(d, p, cornerX, cornerY)
 
 		bbox := pieceBoundingBox(p)
 		rowMaxHeight := bbox.Height()
@@ -131,7 +133,7 @@ func (pf *PatternFile) DrawPattern(s styles.Style) error {
 				break
 			}
 
-			pf.drawPiece(p, cornerX, cornerY)
+			pf.drawPiece(d, p, cornerX, cornerY)
 
 			cornerX += bbox.Width() + PIECE_MARGIN
 			height := bbox.Height()
@@ -148,7 +150,7 @@ func (pf *PatternFile) DrawPattern(s styles.Style) error {
 	for ; cornerX < MAX_WIDTH && j < len(piecesOffFold); j++ {
 		p := piecesOffFold[j]
 
-		pf.drawPiece(p, cornerX, cornerY)
+		pf.drawPiece(d, p, cornerX, cornerY)
 
 		bbox := pieceBoundingBox(p)
 		cornerX += bbox.Width() + PIECE_MARGIN
@@ -167,7 +169,7 @@ func (pf *PatternFile) DrawPattern(s styles.Style) error {
 	return nil
 }
 
-func (pf *PatternFile) drawMultilineText(lines []string, pos *geometry.Point) error {
+func (pf *PatternFile) drawMultilineText(d drawing.Drawing, lines []string, pos *geometry.Point) error {
 	detailsBlk := &geometry.Block{}
 	for _, l := range lines {
 		detailsBlk.AddText(&geometry.Text{
@@ -178,7 +180,7 @@ func (pf *PatternFile) drawMultilineText(lines []string, pos *geometry.Point) er
 		pos = pos.Move(0, -LINE_SPACING)
 	}
 
-	return pf.DrawBlock(detailsBlk, &geometry.Point{})
+	return pf.DrawBlock(d, detailsBlk, &geometry.Point{})
 }
 
 func pieceBoundingBox(p pieces.Piece) *geometry.BoundingBox {
@@ -189,7 +191,7 @@ func pieceBoundingBox(p pieces.Piece) *geometry.BoundingBox {
 	return geometry.CollectiveBoundingBox(cl, sl, nl)
 }
 
-func (pf *PatternFile) drawPiece(p pieces.Piece, cornerX, cornerY float64) error {
+func (pf *PatternFile) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY float64) error {
 	bbox := pieceBoundingBox(p)
 
 	pieceOffset := &geometry.Point{
@@ -197,32 +199,32 @@ func (pf *PatternFile) drawPiece(p pieces.Piece, cornerX, cornerY float64) error
 		Y: cornerY - bbox.Top,
 	}
 
-	err := pf.SetLayer(LAYER_CUT)
+	err := pf.SetLayer(d, LAYER_CUT)
 	if err != nil {
 		return err
 	}
 
-	err = pf.DrawBlock(p.CutLayer(), pieceOffset)
+	err = pf.DrawBlock(d, p.CutLayer(), pieceOffset)
 	if err != nil {
 		return err
 	}
 
-	err = pf.SetLayer(LAYER_STITCH)
+	err = pf.SetLayer(d, LAYER_STITCH)
 	if err != nil {
 		return err
 	}
 
-	err = pf.DrawBlock(p.StitchLayer(), pieceOffset)
+	err = pf.DrawBlock(d, p.StitchLayer(), pieceOffset)
 	if err != nil {
 		return err
 	}
 
-	err = pf.SetLayer(LAYER_NOTATIONS)
+	err = pf.SetLayer(d, LAYER_NOTATIONS)
 	if err != nil {
 		return err
 	}
 
-	err = pf.DrawBlock(p.NotationLayer(), pieceOffset)
+	err = pf.DrawBlock(d, p.NotationLayer(), pieceOffset)
 	if err != nil {
 		return err
 	}
@@ -235,38 +237,38 @@ func (pf *PatternFile) drawPiece(p pieces.Piece, cornerX, cornerY float64) error
 		fmt.Sprintf("PN: %s", details.PieceNumber),
 		details.Description,
 	}
-	err = pf.drawMultilineText(lines, pieceCentre)
+	err = pf.drawMultilineText(d, lines, pieceCentre)
 
 	return err
 }
 
-func (d *PatternFile) DrawBlock(b *geometry.Block, offset *geometry.Point) error {
+func (pf *PatternFile) DrawBlock(d drawing.Drawing, b *geometry.Block, offset *geometry.Point) error {
 	movedBlk := b.Move(offset.X, offset.Y)
 
 	var err error
 	for _, l := range movedBlk.StraightLines {
-		err = d.drawStraightLine(l)
+		err = d.StraightLine(l.Start, l.End)
 		if err != nil {
 			return err
 		}
 	}
 
 	for _, p := range movedBlk.Points {
-		err = d.drawPoint(p)
+		err = pf.drawPoint(d, p)
 		if err != nil {
 			return err
 		}
 	}
 
 	for _, t := range movedBlk.Text {
-		err = d.drawText(t)
+		err = d.Text(t.Position, t.Content, t.Rotation)
 		if err != nil {
 			return err
 		}
 	}
 
 	for _, block := range movedBlk.Blocks {
-		err = d.DrawBlock(block, offset)
+		err = pf.DrawBlock(d, block, offset)
 		if err != nil {
 			return err
 		}
@@ -275,12 +277,8 @@ func (d *PatternFile) DrawBlock(b *geometry.Block, offset *geometry.Point) error
 	return nil
 }
 
-func (d *PatternFile) drawStraightLine(l *geometry.StraightLine) error {
-	return d.dxf.StraightLine(l.Start, l.End)
-}
-
-func (d *PatternFile) drawPoint(p *geometry.Point) error {
-	err := d.dxf.StraightLine(
+func (pf *PatternFile) drawPoint(d drawing.Drawing, p *geometry.Point) error {
+	err := d.StraightLine(
 		&geometry.Point{
 			X: p.X-0.5,
 			Y: p.Y,
@@ -294,7 +292,7 @@ func (d *PatternFile) drawPoint(p *geometry.Point) error {
 		return err
 	}
 
-	return d.dxf.StraightLine(
+	return d.StraightLine(
 		&geometry.Point{
 			X: p.X,
 			Y: p.Y-0.5,
@@ -304,8 +302,4 @@ func (d *PatternFile) drawPoint(p *geometry.Point) error {
 			Y: p.Y+0.5,
 		},
 	)
-}
-
-func (d *PatternFile) drawText(t *geometry.Text) error {
-	return d.dxf.Text(t.Position, t.Content, t.Rotation)
 }

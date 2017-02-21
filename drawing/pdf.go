@@ -24,7 +24,7 @@ func NewPDF(widthCm float64) Drawing {
 		Size: gofpdf.SizeType{Wd: widthCm, Ht: PDF_PAGE_HEIGHT},
 	})
 	pdf.SetMargins(PDF_PAGE_MARGIN, PDF_PAGE_MARGIN, PDF_PAGE_MARGIN)
-	pdf.SetFont("Courier", "", 48.0)
+	pdf.SetFont("Courier", "", 36.0)
 	pdf.AddPage()
 
 	return &pdfDrawing{
