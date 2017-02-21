@@ -51,6 +51,10 @@ func (p *Point) SquareToHorizontalLine(y float64) *Point {
 	return &Point{p.X, y}
 }
 
+func (p *Point) SquareUpToLine(l Line) *Point {
+	return l.PointAt(distanceToXIntersect(l, p.X))
+}
+
 func (p *Point) MidpointTo(other *Point) *Point {
 	x := p.X + ((other.X - p.X) / 2)
 	y := p.Y + ((other.Y - p.Y) / 2)
@@ -90,4 +94,11 @@ func (p *Point) RotateAround(o *Point, a *Angle) *Point {
 	newAngle := p.AngleRelativeTo(o).Add(a)
 
 	return o.DrawAt(newAngle, r)
+}
+
+func (p *Point) MirrorHorizontally(x float64) *Point {
+	return &Point{
+		X: x - (p.X - x),
+		Y: p.Y,
+	}
 }

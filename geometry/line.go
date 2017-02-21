@@ -31,16 +31,24 @@ func lengthOfLine(l Line) float64 {
 	return accrued
 }
 
-func pointOnLine(l Line, dist float64) *Point {
+func straightLineOnLine(l Line, dist float64) (sl *StraightLine, start float64) {
 	accruedLen := 0.0
-
 	for _, sl := range l.StraightLines() {
 		curLen := sl.Length()
 		if accruedLen + curLen > dist || math.Abs((accruedLen + curLen) - dist) <= 0.001 {
-			return sl.PointAt(dist - accruedLen)
+			return sl, accruedLen
 		}
 
 		accruedLen += curLen
+	}
+
+	return nil, l.Length()
+}
+
+func pointOnLine(l Line, dist float64) *Point {
+	sl, accruedLen := straightLineOnLine(l, dist)
+	if sl != nil {
+		return sl.PointAt(dist - accruedLen)
 	}
 
 	fmt.Printf("Tried to get point at %.3f of %v but length is only %.3f\n", dist, l, l.Length())
@@ -61,4 +69,73 @@ func angleAtPointOnLine(l Line, dist float64) *Angle {
 
 	fmt.Printf("Tried to get angle at %.3f of %v but length is only %.3f\n", dist, l, l.Length())
 	panic("Cannot return an angle that is beyond the end of the line.");
+}
+
+func SubLine(line Line, distStart float64, length float64) Line {
+	if distStart + length > line.Length() {
+		panic("Sub-line length exceeds original line length")
+	}
+
+	out := &Polyline{}
+
+	pieces := 20
+	pieceLength := length / float64(pieces)
+	for i := 0; i < pieces; i++ {
+		start := line.PointAt(distStart + float64(i) * pieceLength)
+		end := line.PointAt(distStart + float64(i + 1) * pieceLength)
+
+		out.AddLine(&StraightLine{
+			Start: start,
+			End: end,
+		})
+	}
+
+	return out
+}
+
+func distanceToXIntersect(l Line, x float64) float64 {
+	// Make sure point falls along line
+	bbox := l.BoundingBox()
+	if bbox.Left > x || bbox.Right < x {
+		panic(fmt.Sprintf("X of %.2f falls outside of line %v.", x, l))
+	}
+
+	// Follow along the line until we hit x
+	accruedLen := 0.0
+	for _, sl := range l.StraightLines() {
+		bbox := sl.BoundingBox()
+		if bbox.Width() == 0.0 {
+			continue
+		}
+
+		if bbox.Left <= x && bbox.Right >= x {
+			p := (x - sl.Start.X) / (sl.End.X - sl.Start.X)
+			h := math.Sqrt(math.Pow(p * (sl.End.X - sl.Start.X), 2.0) + math.Pow(p * (sl.End.Y - sl.Start.Y), 2.0))
+
+			return accruedLen + h
+		}
+
+		accruedLen += sl.Length()
+	}
+
+	panic("Point on line not found")
+}
+
+func SliceLineVertically(l Line, x float64) Line {
+	return SubLine(l, 0.0, distanceToXIntersect(l, x))
+}
+
+func MirrorLineHorizontally(line Line, x float64) Line {
+	out := &Polyline{}
+
+	for _, sl := range line.StraightLines() {
+		out.AddLine(
+			&StraightLine{
+				Start: sl.Start.MirrorHorizontally(x),
+				End: sl.End.MirrorHorizontally(x),
+			},
+		)
+	}
+
+	return out
 }
