@@ -6,18 +6,13 @@ import (
 
 	"github.com/tailored-style/pattern-generator/geometry"
 	"github.com/tailored-style/pattern-generator/styles"
-	"github.com/tobyjsullivan/dxf/color"
-	"github.com/tobyjsullivan/dxf/drawing"
-	"github.com/tobyjsullivan/dxf/table"
-	"github.com/tobyjsullivan/dxf"
 	"github.com/tailored-style/pattern-generator/pieces"
+	"github.com/tailored-style/pattern-generator/drawing"
 )
 
 const (
 	LAYER_CUT       = "CUT LINES"
 	LAYER_STITCH    = "STITCH LINES"
-	LAYER_FOLD      = "FOLD LINES"
-	LAYER_GRAIN     = "GRAIN LINES"
 	LAYER_NOTATIONS = "NOTATIONS"
 
 	LINE_SPACING = 1.4
@@ -27,20 +22,28 @@ const (
 )
 
 type PatternFile struct {
-	drawing *drawing.Drawing
+	Style styles.Style
+	dxf drawing.Drawing
 }
 
-func NewPatternFile() *PatternFile {
-	drawing := dxf.NewDrawing()
-	drawing.Header().LtScale = 1.0
-
-	return &PatternFile{
-		drawing: drawing,
+func (pf *PatternFile) SaveDXF(filepath string) error {
+	pf.dxf = drawing.NewDXF(MAX_WIDTH)
+	err := pf.DrawPattern(pf.Style)
+	if err != nil {
+		return err
 	}
+
+	return pf.dxf.SaveAs(filepath)
 }
 
-func (pf *PatternFile) SaveAs(filepath string) error {
-	return pf.drawing.SaveAs(filepath)
+func (pf *PatternFile) SavePDF(filepath string) error {
+	pf.dxf = drawing.NewPDF(MAX_WIDTH)
+	err := pf.DrawPattern(pf.Style)
+	if err != nil {
+		return err
+	}
+
+	return pf.dxf.SaveAs(filepath)
 }
 
 func (d *PatternFile) SetLayer(layer string) error {
@@ -48,15 +51,11 @@ func (d *PatternFile) SetLayer(layer string) error {
 
 	switch layer {
 	case LAYER_CUT:
-		err = d.findOrCreateLayer(LAYER_CUT, dxf.DefaultColor, dxf.DefaultLineType)
+		err = d.dxf.SetLayer(drawing.LAYER_NORMAL)
 	case LAYER_STITCH:
-		err = d.findOrCreateLayer(LAYER_STITCH, dxf.DefaultColor, table.NewLineType("Dotted", "Dot . . . .", 0.1, -0.5))
+		err = d.dxf.SetLayer(drawing.LAYER_ALT1)
 	case LAYER_NOTATIONS:
-		err = d.findOrCreateLayer(LAYER_NOTATIONS, dxf.DefaultColor, dxf.DefaultLineType)
-	case LAYER_FOLD:
-		err = d.findOrCreateLayer(LAYER_FOLD, dxf.DefaultColor, table.LT_DASHDOT)
-	case LAYER_GRAIN:
-		err = d.findOrCreateLayer(LAYER_GRAIN, color.Red, dxf.DefaultLineType)
+		err = d.dxf.SetLayer(drawing.LAYER_ALT2)
 	default:
 		err = errors.New("The requested layer does not exist")
 	}
@@ -277,49 +276,36 @@ func (d *PatternFile) DrawBlock(b *geometry.Block, offset *geometry.Point) error
 }
 
 func (d *PatternFile) drawStraightLine(l *geometry.StraightLine) error {
-	_, err := d.drawing.Line(l.Start.X, l.Start.Y, 0.0, l.End.X, l.End.Y, 0.0)
-	return err
+	return d.dxf.StraightLine(l.Start, l.End)
 }
 
 func (d *PatternFile) drawPoint(p *geometry.Point) error {
-	_, err := d.drawing.Line(p.X-0.5, p.Y, 0.0, p.X+0.5, p.Y, 0.0)
+	err := d.dxf.StraightLine(
+		&geometry.Point{
+			X: p.X-0.5,
+			Y: p.Y,
+		},
+		&geometry.Point{
+			X: p.X+0.5,
+			Y: p.Y,
+		},
+	)
 	if err != nil {
 		return err
 	}
 
-	_, err = d.drawing.Line(p.X, p.Y-0.5, 0.0, p.X, p.Y+0.5, 0.0)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return d.dxf.StraightLine(
+		&geometry.Point{
+			X: p.X,
+			Y: p.Y-0.5,
+		},
+		&geometry.Point{
+			X: p.X,
+			Y: p.Y+0.5,
+		},
+	)
 }
 
 func (d *PatternFile) drawText(t *geometry.Text) error {
-	text, err := d.drawing.Text(t.Content, t.Position.X, t.Position.Y, 0.0, 1.0)
-	if err != nil {
-		return err
-	}
-	if t.Rotation != nil {
-		text.Rotate = t.Rotation.Degrees()
-	}
-	return nil
-}
-
-func (d *PatternFile) findOrCreateLayer(name string, cl color.ColorNumber, lt *table.LineType) error {
-	layer, _ := d.drawing.Layer(name, true)
-	if layer == nil {
-
-		// Check if linetype exists
-		existingLType, _ := d.drawing.LineType(lt.Name())
-		if existingLType == nil {
-			d.drawing.Sections[drawing.TABLES].(table.Tables)[table.LTYPE].Add(lt)
-		}
-
-		if _, err := d.drawing.AddLayer(name, cl, lt, true); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return d.dxf.Text(t.Position, t.Content, t.Rotation)
 }
