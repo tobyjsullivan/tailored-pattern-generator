@@ -8,6 +8,7 @@ import (
 	"github.com/tailored-style/pattern-generator/styles"
 	"github.com/tailored-style/pattern-generator/pieces"
 	"github.com/tailored-style/pattern-generator/drawing"
+	"time"
 )
 
 const (
@@ -75,6 +76,7 @@ func (pf *PatternFile) DrawPattern(d drawing.Drawing, s styles.Style) error {
 		lines := []string{
 			fmt.Sprintf("Style Number: %s", details.StyleNumber),
 			details.Description,
+			fmt.Sprintf("Generated: %s", time.Now().Format("2006-01-02 15:04 MST")),
 		}
 
 		if details.Measurements != nil {
