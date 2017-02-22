@@ -102,3 +102,10 @@ func (p *Point) MirrorHorizontally(x float64) *Point {
 		Y: p.Y,
 	}
 }
+
+func (p *Point) MirrorVertically(y float64) *Point {
+	return &Point{
+		X: p.X,
+		Y: y - (p.Y - y),
+	}
+}
