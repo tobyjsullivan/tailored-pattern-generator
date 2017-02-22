@@ -56,11 +56,11 @@ func (c *ParabolaCurve) StraightLines() []*StraightLine {
 	h := c.h()
 	if h != c.Start.X {
 		lines = append(lines, &StraightLine{
-			Start: &Point{
+			Start: c.Start,
+			End: &Point{
 				X: h,
 				Y: c.Start.Y,
 			},
-			End: c.Start,
 		})
 	}
 

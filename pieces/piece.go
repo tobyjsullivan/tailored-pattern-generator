@@ -15,7 +15,7 @@ type Piece interface {
 }
 
 func AddSeamAllowance(l geometry.Line, opposite bool) geometry.Line {
-	numPieces := 20
+	numPieces := 50
 	segmentLength := l.Length() / float64(numPieces)
 
 	result := &geometry.Polyline{}

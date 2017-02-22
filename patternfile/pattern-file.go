@@ -19,7 +19,7 @@ const (
 
 	LINE_SPACING = 1.4
 
-	PIECE_MARGIN = 0.0
+	PIECE_MARGIN = 1.0
 	MAX_WIDTH = 91.44 // 36"
 )
 
