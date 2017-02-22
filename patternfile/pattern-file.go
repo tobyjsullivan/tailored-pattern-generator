@@ -9,6 +9,7 @@ import (
 	"github.com/tailored-style/pattern-generator/pieces"
 	"github.com/tailored-style/pattern-generator/drawing"
 	"time"
+	"math"
 )
 
 const (
@@ -18,8 +19,8 @@ const (
 
 	LINE_SPACING = 1.4
 
-	PIECE_MARGIN = 5.00
-	MAX_WIDTH = 90.0
+	PIECE_MARGIN = 1.0
+	MAX_WIDTH = 76.2 // 30"
 )
 
 type PatternFile struct {
@@ -73,34 +74,45 @@ func (pf *PatternFile) DrawPattern(d drawing.Drawing, s styles.Style) error {
 	startingY := 0.0
 	details := s.Details()
 	if details != nil {
-		lines := []string{
+		detailText := []string{
 			fmt.Sprintf("Style Number: %s", details.StyleNumber),
 			details.Description,
 			fmt.Sprintf("Generated: %s", time.Now().Format("2006-01-02 15:04 MST")),
 		}
 
+		detailPosition := &geometry.Point {
+			X: 0.0,
+			Y: -1.0,
+		}
+		err = pf.drawMultilineText(d, detailText, detailPosition)
+		if err != nil {
+			return err
+		}
+
+		startingY = -(float64(len(detailText)) * LINE_SPACING + 2.0)
+
 		if details.Measurements != nil {
-			lines = append(lines, []string{
+			measurementText := []string{
 				fmt.Sprintf("Height: %.1f cm", details.Measurements.Height),
 				fmt.Sprintf("Neck: %.1f cm", details.Measurements.NeckCircumference),
 				fmt.Sprintf("Chest: %.1f cm", details.Measurements.ChestCircumference),
 				fmt.Sprintf("Waist: %.1f cm", details.Measurements.WaistCircumference),
 				fmt.Sprintf("Hip: %.1f cm", details.Measurements.HipCircumference),
 				fmt.Sprintf("Sleeve Length: %.1f cm", details.Measurements.SleeveLength),
-			}...)
+			}
+			measurementPosition := &geometry.Point {
+				X: d.DrawableWidth() / 2.0,
+				Y: -1.0,
+			}
+			err = pf.drawMultilineText(d, measurementText, measurementPosition)
+			if err != nil {
+				return err
+			}
+
+			startingY = math.Min(startingY, -(float64(len(measurementText)) * LINE_SPACING + 2.0))
 		}
 
-		// Write style details just above the origin mark
-		detailPosition := &geometry.Point {
-			X: 0.0,
-			Y: -1.0,
-		}
-		err = pf.drawMultilineText(d, lines, detailPosition)
-		if err != nil {
-			return err
-		}
 
-		startingY = -(float64(len(lines)) * LINE_SPACING + 2.0)
 	}
 
 	// Pieces on fold should be most left.
