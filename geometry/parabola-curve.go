@@ -53,22 +53,23 @@ func (c *ParabolaCurve) StraightLines() []*StraightLine {
 
 	lines := []*StraightLine{}
 
-	if c.h() != c.Start.X {
+	h := c.h()
+	if h != c.Start.X {
 		lines = append(lines, &StraightLine{
-			Start: c.Start,
-			End: &Point{
-				X: c.h(),
+			Start: &Point{
+				X: h,
 				Y: c.Start.Y,
 			},
+			End: c.Start,
 		})
 	}
 
 	pieces := 20
-	pieceSize := (c.End.X - c.h()) / float64(pieces)
+	pieceSize := (c.End.X - h) / float64(pieces)
 
 	for i := 0; i < pieces; i++ {
-		sx := c.h() + pieceSize * float64(i)
-		ex := c.h() + pieceSize * float64(i + 1)
+		sx := h + pieceSize * float64(i)
+		ex := h + pieceSize * float64(i + 1)
 
 		lines = append(lines, &StraightLine{
 			Start: &Point{
