@@ -99,6 +99,7 @@ func (pf *PatternFile) DrawPattern(d drawing.Drawing, s styles.Style) error {
 				fmt.Sprintf("Waist: %.1f cm", details.Measurements.WaistCircumference),
 				fmt.Sprintf("Hip: %.1f cm", details.Measurements.HipCircumference),
 				fmt.Sprintf("Sleeve Length: %.1f cm", details.Measurements.SleeveLength),
+				fmt.Sprintf("Wrist: %.1f cm", details.Measurements.WristCircumference),
 			}
 			measurementPosition := &geometry.Point {
 				X: d.DrawableWidth() / 2.0,
