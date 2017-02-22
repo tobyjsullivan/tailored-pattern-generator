@@ -101,8 +101,6 @@ func (c *ThreePointCurve) StraightLines() []*StraightLine {
 
 	if c.Middle.Y <= c.Start.Y && c.Middle.Y <= c.End.Y ||
 			c.Middle.Y >= c.Start.Y && c.Middle.Y >= c.End.Y{
-		fmt.Println("Middle is outlier!")
-
 		section1 := &ThreePointCurve{
 			Start: c.Start,
 			Middle: c.Start.MidpointTo(c.Middle),

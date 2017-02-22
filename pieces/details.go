@@ -1,6 +1,6 @@
 package pieces
 
 type Details struct {
-	PieceNumber string
+	PieceNumber int
 	Description string
 }

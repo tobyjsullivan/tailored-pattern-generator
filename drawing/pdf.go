@@ -8,7 +8,9 @@ import (
 const (
 	PDF_PAGE_MARGIN = 1.0
 	PDF_PAGE_UNIT = "cm"
-	PDF_PAGE_HEIGHT = 228.6 // 90 inches
+	//PDF_PAGE_HEIGHT = 254.0 // 100 inches
+	//PDF_PAGE_HEIGHT = 228.6 // 90 inches
+	PDF_PAGE_HEIGHT = 182.88 // 72 inches
 )
 
 type pdfDrawing struct {

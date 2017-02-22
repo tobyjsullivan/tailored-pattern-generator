@@ -19,8 +19,8 @@ const (
 
 	LINE_SPACING = 1.4
 
-	PIECE_MARGIN = 1.0
-	MAX_WIDTH = 76.2 // 30"
+	PIECE_MARGIN = 0.0
+	MAX_WIDTH = 91.44 // 36"
 )
 
 type PatternFile struct {
@@ -129,25 +129,32 @@ func (pf *PatternFile) DrawPattern(d drawing.Drawing, s styles.Style) error {
 
 	// Draw each piece
 	cornerX, cornerY := 0.0, startingY
+	drawableWidth := d.DrawableWidth()
 	j := 0
 	for i := 0; i < len(piecesOnFold); i++ {
 		// Draw first piece on fold
 		p := piecesOnFold[i]
+		fmt.Printf("Want to draw %v\n", p)
 
+		fmt.Printf("Drawing %v\n", p)
 		pf.drawPiece(d, p, cornerX, cornerY)
 
 		bbox := pieceBoundingBox(p)
 		rowMaxHeight := bbox.Height()
 		cornerX += bbox.Width() + PIECE_MARGIN
 
-		for ; cornerX < MAX_WIDTH && j < len(piecesOffFold); j++ {
+
+		for ; cornerX < drawableWidth && j < len(piecesOffFold); j++ {
 			p = piecesOffFold[j]
+			fmt.Printf("Want to draw %v at (%.2f, %.2f)\n", p, cornerX, cornerY)
 			bbox = pieceBoundingBox(p)
 
-			if cornerX + bbox.Width() > MAX_WIDTH {
+			if cornerX + bbox.Width() > drawableWidth {
+				fmt.Printf("Piece %v is too big for here\n", p)
 				break
 			}
 
+			fmt.Printf("Drawing %v\n", p)
 			pf.drawPiece(d, p, cornerX, cornerY)
 
 			cornerX += bbox.Width() + PIECE_MARGIN
@@ -161,23 +168,27 @@ func (pf *PatternFile) DrawPattern(d drawing.Drawing, s styles.Style) error {
 		cornerY -= rowMaxHeight + PIECE_MARGIN
 	}
 
+	fmt.Println("Done drawing all pieces on fold")
 	rowMaxHeight := 0.0
-	for ; cornerX < MAX_WIDTH && j < len(piecesOffFold); j++ {
+	for ; cornerX < drawableWidth && j < len(piecesOffFold); j++ {
 		p := piecesOffFold[j]
-
-		pf.drawPiece(d, p, cornerX, cornerY)
+		fmt.Printf("Want to draw %v at (%.2f, %.2f)\n", p, cornerX, cornerY)
 
 		bbox := pieceBoundingBox(p)
+		if cornerX + bbox.Width() > drawableWidth {
+			fmt.Println("Piece won't fit on this line")
+			cornerX = 0.0
+			cornerY -= rowMaxHeight + PIECE_MARGIN
+			rowMaxHeight = 0.0
+		}
+
+		fmt.Printf("Drawing %v\n", p)
+		pf.drawPiece(d, p, cornerX, cornerY)
+
 		cornerX += bbox.Width() + PIECE_MARGIN
 		height := bbox.Height()
 		if height > rowMaxHeight {
 			rowMaxHeight = height
-		}
-
-		if cornerX > MAX_WIDTH {
-			cornerX = 0.0
-			cornerY -= bbox.Height() + PIECE_MARGIN
-			rowMaxHeight = 0.0
 		}
 	}
 
@@ -249,7 +260,7 @@ func (pf *PatternFile) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cor
 	pieceCentre := pieceCorner.MidpointTo(pieceCorner.Move(bbox.Width(), -bbox.Height()))
 	details := p.Details()
 	lines := []string {
-		fmt.Sprintf("PN: %s", details.PieceNumber),
+		fmt.Sprintf("PN: %d", details.PieceNumber),
 		details.Description,
 	}
 	err = pf.drawMultilineText(d, lines, pieceCentre)
