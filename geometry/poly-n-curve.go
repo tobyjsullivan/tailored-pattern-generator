@@ -10,6 +10,7 @@ type PolyNCurve struct {
 	Points []*Point
 	StartAngle *Angle
 	EndAngle *Angle
+	Vertical bool
 
 	xCache mat64.Matrix
 }
@@ -71,6 +72,28 @@ func (c *PolyNCurve) p(x float64) float64 {
 }
 
 func (c *PolyNCurve) StraightLines() []*StraightLine {
+	if c.Vertical {
+		rotation := &Angle{Rads: math.Pi / 2.0}
+		origin := c.Points[0]
+		rotatedPoints := make([]*Point, len(c.Points))
+		for i := 0; i < len(c.Points); i++ {
+			rotatedPoints[i] = c.Points[i].RotateAround(origin, rotation)
+		}
+
+		subLine := &PolyNCurve{
+			Points: rotatedPoints,
+			StartAngle: c.StartAngle.Add(rotation),
+			EndAngle: c.EndAngle.Add(rotation),
+		}
+
+		out := []*StraightLine{}
+		for _, sl := range subLine.StraightLines() {
+			out = append(out, sl.RotateAround(origin, rotation.Neg()))
+		}
+
+		return out
+	}
+
 	pieces := 20 * len(c.Points)
 	p0 := c.Points[0]
 	pieceLength := (c.Points[len(c.Points) - 1].X - p0.X) / float64(pieces)
