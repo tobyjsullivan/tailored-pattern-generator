@@ -1,4 +1,4 @@
-package marker
+package rendering
 
 import (
 	"github.com/tailored-style/pattern-generator/styles"
@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	PAGE_WIDTH = 152.4 // 60 inches
-	PIECE_MARGIN = 4.0
+	MARKER_PAGE_WIDTH = 152.4 // 60 inches
+	MARKER_PIECE_MARGIN = 4.0
 )
 
 type Marker struct {
@@ -17,7 +17,7 @@ type Marker struct {
 }
 
 func (m *Marker) SavePDF(filepath string) error {
-	drawing := drawing.NewPDF(PAGE_WIDTH)
+	drawing := drawing.NewPDF(MARKER_PAGE_WIDTH)
 
 	m.drawPieces(drawing)
 
@@ -48,7 +48,7 @@ func (m *Marker) drawPieces(d drawing.Drawing) {
 
 		bbox := pieceBoundingBox(p)
 		rowMaxHeight := bbox.Height()
-		cornerX += bbox.Width() + PIECE_MARGIN
+		cornerX += bbox.Width() + MARKER_PIECE_MARGIN
 
 		for ; cornerX < maxWidth && j < len(piecesOffFold); j++ {
 			p = piecesOffFold[j]
@@ -60,7 +60,7 @@ func (m *Marker) drawPieces(d drawing.Drawing) {
 
 			drawPiece(d, p, cornerX, cornerY)
 
-			cornerX += bbox.Width() + PIECE_MARGIN
+			cornerX += bbox.Width() + MARKER_PIECE_MARGIN
 			height := bbox.Height()
 			if height > rowMaxHeight {
 				rowMaxHeight = height
@@ -68,7 +68,7 @@ func (m *Marker) drawPieces(d drawing.Drawing) {
 		}
 
 		cornerX = 0.0
-		cornerY -= rowMaxHeight + PIECE_MARGIN
+		cornerY -= rowMaxHeight + MARKER_PIECE_MARGIN
 	}
 
 	rowMaxHeight := 0.0
@@ -78,7 +78,7 @@ func (m *Marker) drawPieces(d drawing.Drawing) {
 		drawPiece(d, p, cornerX, cornerY)
 
 		bbox := pieceBoundingBox(p)
-		cornerX += bbox.Width() + PIECE_MARGIN
+		cornerX += bbox.Width() + MARKER_PIECE_MARGIN
 		height := bbox.Height()
 		if height > rowMaxHeight {
 			rowMaxHeight = height
@@ -86,7 +86,7 @@ func (m *Marker) drawPieces(d drawing.Drawing) {
 
 		if cornerX > maxWidth {
 			cornerX = 0.0
-			cornerY -= bbox.Height() + PIECE_MARGIN
+			cornerY -= bbox.Height() + MARKER_PIECE_MARGIN
 			rowMaxHeight = 0.0
 		}
 	}
@@ -188,13 +188,4 @@ func drawPoint(pdf drawing.Drawing, p *geometry.Point) error {
 
 func drawText(d drawing.Drawing, t *geometry.Text) error {
 	return d.Text(t.Position, t.Content, t.Rotation)
-}
-
-
-func pieceBoundingBox(p pieces.Piece) *geometry.BoundingBox {
-	cl := p.CutLayer()
-	sl := p.StitchLayer()
-	nl := p.NotationLayer()
-
-	return geometry.CollectiveBoundingBox(cl, sl, nl)
 }

@@ -1,4 +1,4 @@
-package patternfile
+package rendering
 
 import (
 	"errors"
@@ -19,16 +19,16 @@ const (
 
 	LINE_SPACING = 1.4
 
-	PIECE_MARGIN = 1.0
-	MAX_WIDTH = 91.44 // 36"
+	PATTERN_PIECE_MARGIN = 1.0
+	PATTERN_PAGE_WIDTH = 91.44 // 36"
 )
 
-type PatternFile struct {
+type Pattern struct {
 	Style styles.Style
 }
 
-func (pf *PatternFile) SaveDXF(filepath string) error {
-	dxf := drawing.NewDXF(MAX_WIDTH)
+func (pf *Pattern) SaveDXF(filepath string) error {
+	dxf := drawing.NewDXF(PATTERN_PAGE_WIDTH)
 	err := pf.DrawPattern(dxf, pf.Style)
 	if err != nil {
 		return err
@@ -37,8 +37,8 @@ func (pf *PatternFile) SaveDXF(filepath string) error {
 	return dxf.SaveAs(filepath)
 }
 
-func (pf *PatternFile) SavePDF(filepath string) error {
-	pdf := drawing.NewPDF(MAX_WIDTH)
+func (pf *Pattern) SavePDF(filepath string) error {
+	pdf := drawing.NewPDF(PATTERN_PAGE_WIDTH)
 	err := pf.DrawPattern(pdf, pf.Style)
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func (pf *PatternFile) SavePDF(filepath string) error {
 	return pdf.SaveAs(filepath)
 }
 
-func (pf *PatternFile) SetLayer(d drawing.Drawing, layer string) error {
+func (pf *Pattern) SetLayer(d drawing.Drawing, layer string) error {
 	var err error
 
 	switch layer {
@@ -64,7 +64,7 @@ func (pf *PatternFile) SetLayer(d drawing.Drawing, layer string) error {
 	return err
 }
 
-func (pf *PatternFile) DrawPattern(d drawing.Drawing, s styles.Style) error {
+func (pf *Pattern) DrawPattern(d drawing.Drawing, s styles.Style) error {
 	var err error
 
 	err = pf.SetLayer(d, LAYER_CUT)
@@ -141,7 +141,7 @@ func (pf *PatternFile) DrawPattern(d drawing.Drawing, s styles.Style) error {
 
 		bbox := pieceBoundingBox(p)
 		rowMaxHeight := bbox.Height()
-		cornerX += bbox.Width() + PIECE_MARGIN
+		cornerX += bbox.Width() + PATTERN_PIECE_MARGIN
 
 
 		for ; cornerX < drawableWidth && j < len(piecesOffFold); j++ {
@@ -157,7 +157,7 @@ func (pf *PatternFile) DrawPattern(d drawing.Drawing, s styles.Style) error {
 			fmt.Printf("Drawing %v\n", p)
 			pf.drawPiece(d, p, cornerX, cornerY)
 
-			cornerX += bbox.Width() + PIECE_MARGIN
+			cornerX += bbox.Width() + PATTERN_PIECE_MARGIN
 			height := bbox.Height()
 			if height > rowMaxHeight {
 				rowMaxHeight = height
@@ -165,7 +165,7 @@ func (pf *PatternFile) DrawPattern(d drawing.Drawing, s styles.Style) error {
 		}
 
 		cornerX = 0.0
-		cornerY -= rowMaxHeight + PIECE_MARGIN
+		cornerY -= rowMaxHeight + PATTERN_PIECE_MARGIN
 	}
 
 	fmt.Println("Done drawing all pieces on fold")
@@ -178,14 +178,14 @@ func (pf *PatternFile) DrawPattern(d drawing.Drawing, s styles.Style) error {
 		if cornerX + bbox.Width() > drawableWidth {
 			fmt.Println("Piece won't fit on this line")
 			cornerX = 0.0
-			cornerY -= rowMaxHeight + PIECE_MARGIN
+			cornerY -= rowMaxHeight + PATTERN_PIECE_MARGIN
 			rowMaxHeight = 0.0
 		}
 
 		fmt.Printf("Drawing %v\n", p)
 		pf.drawPiece(d, p, cornerX, cornerY)
 
-		cornerX += bbox.Width() + PIECE_MARGIN
+		cornerX += bbox.Width() + PATTERN_PIECE_MARGIN
 		height := bbox.Height()
 		if height > rowMaxHeight {
 			rowMaxHeight = height
@@ -195,7 +195,7 @@ func (pf *PatternFile) DrawPattern(d drawing.Drawing, s styles.Style) error {
 	return nil
 }
 
-func (pf *PatternFile) drawMultilineText(d drawing.Drawing, lines []string, pos *geometry.Point) error {
+func (pf *Pattern) drawMultilineText(d drawing.Drawing, lines []string, pos *geometry.Point) error {
 	detailsBlk := &geometry.Block{}
 	for _, l := range lines {
 		detailsBlk.AddText(&geometry.Text{
@@ -209,15 +209,7 @@ func (pf *PatternFile) drawMultilineText(d drawing.Drawing, lines []string, pos 
 	return pf.DrawBlock(d, detailsBlk, &geometry.Point{})
 }
 
-func pieceBoundingBox(p pieces.Piece) *geometry.BoundingBox {
-	cl := p.CutLayer()
-	sl := p.StitchLayer()
-	nl := p.NotationLayer()
-
-	return geometry.CollectiveBoundingBox(cl, sl, nl)
-}
-
-func (pf *PatternFile) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY float64) error {
+func (pf *Pattern) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY float64) error {
 	bbox := pieceBoundingBox(p)
 
 	pieceOffset := &geometry.Point{
@@ -268,7 +260,7 @@ func (pf *PatternFile) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cor
 	return err
 }
 
-func (pf *PatternFile) DrawBlock(d drawing.Drawing, b *geometry.Block, offset *geometry.Point) error {
+func (pf *Pattern) DrawBlock(d drawing.Drawing, b *geometry.Block, offset *geometry.Point) error {
 	movedBlk := b.Move(offset.X, offset.Y)
 
 	var err error
@@ -303,7 +295,7 @@ func (pf *PatternFile) DrawBlock(d drawing.Drawing, b *geometry.Block, offset *g
 	return nil
 }
 
-func (pf *PatternFile) drawPoint(d drawing.Drawing, p *geometry.Point) error {
+func (pf *Pattern) drawPoint(d drawing.Drawing, p *geometry.Point) error {
 	err := d.StraightLine(
 		&geometry.Point{
 			X: p.X-0.5,
