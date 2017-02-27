@@ -286,7 +286,7 @@ func (pf *Pattern) DrawBlock(d drawing.Drawing, b *geometry.Block, offset *geome
 	}
 
 	for _, block := range movedBlk.Blocks {
-		err = pf.DrawBlock(d, block, offset)
+		err = pf.DrawBlock(d, block, &geometry.Point{X: 0.0, Y: 0.0})
 		if err != nil {
 			return err
 		}
