@@ -5,11 +5,12 @@ import (
 	"github.com/tailored-style/pattern-generator/pieces"
 	"github.com/tailored-style/pattern-generator/geometry"
 	"github.com/tailored-style/pattern-generator/drawing"
+	"github.com/tailored-style/pattern-generator/nesting"
 )
 
 const (
 	MARKER_PAGE_WIDTH = 152.4 // 60 inches
-	MARKER_PIECE_MARGIN = 4.0
+	MARKER_PAGE_MAX_HEIGHT = 1000.0 // 10 metres
 )
 
 type Marker struct {
@@ -25,70 +26,35 @@ func (m *Marker) SavePDF(filepath string) error {
 }
 
 func (m *Marker) drawPieces(d drawing.Drawing) {
-	// Pieces on fold should be most left.
-	piecesOnFold := []pieces.Piece{}
-	piecesOffFold := []pieces.Piece{}
-	for _, p := range m.Style.Pieces() {
+	originals := m.Style.Pieces()
+	openedPieces := make([]pieces.Piece, 0, len(originals))
+
+	for _, p := range originals {
 		if p.OnFold() {
-			piecesOnFold = append(piecesOnFold, p)
-		} else {
-			piecesOffFold = append(piecesOffFold, p)
+			p = &pieces.OpenOnFold{Piece: p}
+		}
+
+		openedPieces = append(openedPieces, p)
+	}
+
+	// Compute nesting layout
+	items := make(map[int]*nesting.Rectangle)
+	for i, p := range openedPieces {
+		bbox := pieceBoundingBox(p)
+		items[i] = &nesting.Rectangle{
+			Width: bbox.Width(),
+			Height: bbox.Height(),
 		}
 	}
+	cont := &nesting.Container{
+		Width: d.DrawableWidth(),
+		Height: MARKER_PAGE_MAX_HEIGHT,
+	}
+	placements := cont.Pack(items)
 
 	// Draw each piece
-	maxWidth := d.DrawableWidth()
-	cornerX, cornerY := 0.0, 0.0
-	j := 0
-	for i := 0; i < len(piecesOnFold); i++ {
-		// Draw first piece on fold
-		p := piecesOnFold[i]
-
-		drawPiece(d, p, cornerX, cornerY)
-
-		bbox := pieceBoundingBox(p)
-		rowMaxHeight := bbox.Height()
-		cornerX += bbox.Width() + MARKER_PIECE_MARGIN
-
-		for ; cornerX < maxWidth && j < len(piecesOffFold); j++ {
-			p = piecesOffFold[j]
-			bbox = pieceBoundingBox(p)
-
-			if cornerX + bbox.Width() > maxWidth {
-				break
-			}
-
-			drawPiece(d, p, cornerX, cornerY)
-
-			cornerX += bbox.Width() + MARKER_PIECE_MARGIN
-			height := bbox.Height()
-			if height > rowMaxHeight {
-				rowMaxHeight = height
-			}
-		}
-
-		cornerX = 0.0
-		cornerY -= rowMaxHeight + MARKER_PIECE_MARGIN
-	}
-
-	rowMaxHeight := 0.0
-	for ; cornerX < maxWidth && j < len(piecesOffFold); j++ {
-		p := piecesOffFold[j]
-
-		drawPiece(d, p, cornerX, cornerY)
-
-		bbox := pieceBoundingBox(p)
-		cornerX += bbox.Width() + MARKER_PIECE_MARGIN
-		height := bbox.Height()
-		if height > rowMaxHeight {
-			rowMaxHeight = height
-		}
-
-		if cornerX > maxWidth {
-			cornerX = 0.0
-			cornerY -= bbox.Height() + MARKER_PIECE_MARGIN
-			rowMaxHeight = 0.0
-		}
+	for i, pos := range placements {
+		drawPiece(d, openedPieces[i], pos.X, pos.Y)
 	}
 }
 
@@ -144,7 +110,7 @@ func DrawBlock(d drawing.Drawing, b *geometry.Block, offset *geometry.Point) err
 	}
 
 	for _, block := range movedBlk.Blocks {
-		err = DrawBlock(d, block, offset)
+		err = DrawBlock(d, block, &geometry.Point{X: 0.0, Y: 0.0})
 		if err != nil {
 			return err
 		}

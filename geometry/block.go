@@ -80,3 +80,37 @@ func (b *Block) BoundingBox() *BoundingBox {
 	}
 	return CollectiveBoundingBox(children...)
 }
+
+func (b *Block) MirrorHorizontally(x float64) *Block {
+	out := &Block{}
+
+	for _, sl := range b.StraightLines {
+		out.AddLine(
+			MirrorLineHorizontally(sl, x),
+		)
+	}
+
+	for _, p := range b.Points {
+		out.AddPoint(
+			p.MirrorHorizontally(x),
+		)
+	}
+
+	for _, t := range b.Text {
+		out.AddText(
+			&Text{
+				Content: t.Content,
+				Rotation: t.Rotation,
+				Position: t.Position.MirrorHorizontally(x),
+			},
+		)
+	}
+
+	for _, blk := range b.Blocks {
+		out.AddBlock(
+			blk.MirrorHorizontally(x),
+		)
+	}
+
+	return out
+}
