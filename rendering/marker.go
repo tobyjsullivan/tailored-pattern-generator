@@ -53,8 +53,9 @@ func (m *Marker) drawPieces(d drawing.Drawing) {
 	placements := cont.Pack(items)
 
 	// Draw each piece
-	for i, pos := range placements {
-		drawPiece(d, openedPieces[i], pos.X, pos.Y)
+	for i, p := range openedPieces {
+		pos := placements[i]
+		drawPiece(d, p, pos.X, -pos.Y)
 	}
 }
 
