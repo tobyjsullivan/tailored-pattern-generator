@@ -5,14 +5,20 @@ type ReverseLine struct {
 }
 
 func (l *ReverseLine) StraightLines() []*StraightLine {
-	ls := l.InnerLine.StraightLines()
+	originalLines := l.InnerLine.StraightLines()
+	ls := make([]*StraightLine, len(originalLines))
+
+	copy(ls, originalLines)
 
 	for i := 0; i < (len(ls) / 2); i++ {
-		tail := len(ls) - (i + 1)
+		tailIdx := len(ls) - (i + 1)
 
-		tmp := ls[tail]
-		ls[tail] = ls[i].Reverse()
-		ls[i] = tmp.Reverse()
+		ls[tailIdx], ls[i] = ls[i].Reverse(), ls[tailIdx].Reverse()
+	}
+
+	if len(ls) % 2 == 1 {
+		midx := len(ls) / 2
+		ls[midx] = ls[midx].Reverse()
 	}
 
 	return ls

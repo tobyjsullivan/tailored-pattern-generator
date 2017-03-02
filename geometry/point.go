@@ -63,7 +63,7 @@ func (p *Point) MidpointTo(other *Point) *Point {
 }
 
 func (p *Point) String() string {
-	return fmt.Sprintf("(%.1f, %.1f)", p.X, p.Y)
+	return fmt.Sprintf("(%.2f, %.2f)", p.X, p.Y)
 }
 
 func (p *Point) Move(x, y float64) *Point {
@@ -108,4 +108,10 @@ func (p *Point) MirrorVertically(y float64) *Point {
 		X: p.X,
 		Y: y - (p.Y - y),
 	}
+}
+
+func (p *Point) Equals(o *Point) bool {
+	eps := 0.0000001
+
+	return math.Abs(p.X - o.X) < eps && math.Abs(p.Y - o.Y) < eps
 }

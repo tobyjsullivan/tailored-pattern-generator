@@ -43,22 +43,6 @@ func AddSeamAllowance(l geometry.Line, opposite bool) geometry.Line {
 		result.AddLine(line)
 	}
 
-	// Extend each end by SEAM_ALLOWANCE
-	startL := 0.0
-	startingLine := &geometry.StraightLine{
-		Start: result.PointAt(startL).DrawAt(result.AngleAt(startL).Opposite(), SEAM_ALLOWANCE),
-		End: result.PointAt(startL),
-	}
-
-	endL := result.Length() - 0.01
-	endingLine := &geometry.StraightLine{
-		Start: result.PointAt(endL),
-		End: result.PointAt(endL).DrawAt(result.AngleAt(endL), SEAM_ALLOWANCE),
-	}
-
-	result.Lines = append([]*geometry.StraightLine{startingLine}, result.Lines...)
-	result.AddLine(endingLine)
-
 	return result
 }
 

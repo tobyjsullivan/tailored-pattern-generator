@@ -31,7 +31,7 @@ func lengthOfLine(l Line) float64 {
 	return accrued
 }
 
-func straightLineOnLine(l Line, dist float64) (sl *StraightLine, start float64) {
+func straightLineOnLine(l Line, dist float64) (*StraightLine, float64) {
 	accruedLen := 0.0
 	for _, sl := range l.StraightLines() {
 		curLen := sl.Length()
@@ -56,15 +56,9 @@ func pointOnLine(l Line, dist float64) *Point {
 }
 
 func angleAtPointOnLine(l Line, dist float64) *Angle {
-	accruedLen := 0.0
-
-	for _, sl := range l.StraightLines() {
-		curLen := sl.Length()
-		if accruedLen + curLen > dist || math.Abs((accruedLen + curLen) - dist) <= 0.001 {
-			return sl.AngleAt(0.0)
-		}
-
-		accruedLen += curLen
+	sl, accruedLen := straightLineOnLine(l, dist)
+	if sl != nil {
+		return sl.AngleAt(dist - accruedLen)
 	}
 
 	fmt.Printf("Tried to get angle at %.3f of %v but length is only %.3f\n", dist, l, l.Length())
@@ -138,4 +132,51 @@ func MirrorLineHorizontally(line Line, x float64) Line {
 	}
 
 	return out
+}
+
+func tangentAt(l Line, dist float64) *Tangent {
+	sl, acc := straightLineOnLine(l, dist)
+	return sl.TangentAt(dist - acc)
+}
+
+func TangentAtLineStart(l Line) *Tangent {
+	return tangentAt(l, 0.0)
+}
+
+func TangentAtLineEnd(l Line) *Tangent {
+	endEquiv := l.Length() - 0.001
+
+	t := tangentAt(l, endEquiv)
+
+	sl, _ := straightLineOnLine(l, endEquiv)
+
+	return &Tangent{
+		Origin: sl.End,
+		Direction: t.Direction,
+	}
+}
+
+func Connect(l0 Line, l1 Line) Line {
+	t0 := TangentAtLineEnd(l0)
+	t1 := TangentAtLineStart(l1)
+
+	c0 := t0.Intersection(t1)
+
+	poly := &Polyline{}
+	if c0 == nil {
+		return poly
+	}
+
+	poly.AddLine(
+		&StraightLine{
+			Start: t0.Origin,
+			End: c0,
+		},
+		&StraightLine{
+			Start: c0,
+			End: t1.Origin,
+		},
+	)
+
+	return poly
 }

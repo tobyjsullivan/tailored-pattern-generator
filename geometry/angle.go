@@ -116,3 +116,9 @@ func (a *Angle) String() string {
 
 	return fmt.Sprintf("%s radians", measure)
 }
+
+// Angles are "equivalent" if they are the same direction even if the true Radians are different.
+// For example, 0 rads is equivalent to 2π rads is equivalent to -2π rads.
+func (a *Angle) Equivalent(o *Angle) bool {
+	return a.Radians() == o.Radians()
+}
