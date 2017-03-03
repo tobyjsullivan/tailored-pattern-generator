@@ -47,15 +47,24 @@ func AddSeamAllowance(l geometry.Line, opposite bool) geometry.Line {
 	return result
 }
 
-func Notch(l geometry.Line, dist float64) geometry.Line {
-	p := l.PointAt(dist)
+func Notch(stitch geometry.Line, dist float64, opp bool) geometry.Line {
+	// Get the point on the stitch line
+	t := geometry.TangentAt(stitch, dist)
 
-	s := p.DrawAt(l.AngleAt(dist).Perpendicular(), SEAM_ALLOWANCE / 2.0)
-	e := p.DrawAt(l.AngleAt(dist).Perpendicular().Opposite(), SEAM_ALLOWANCE / 2.0)
+	seamDirection := t.Direction.Perpendicular()
+	if opp {
+		seamDirection = seamDirection.Opposite()
+	}
+
+	// Move out to the seam line
+	t.Origin = t.Origin.DrawAt(seamDirection, SEAM_ALLOWANCE)
+
+	// Point direction inward
+	t.Direction = seamDirection.Opposite()
 
 	return &geometry.StraightLine{
-		Start: s,
-		End: e,
+		Start: t.Origin,
+		End: t.Origin.DrawAt(t.Direction, SEAM_ALLOWANCE / 2.0),
 	}
 }
 

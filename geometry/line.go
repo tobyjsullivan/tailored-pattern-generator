@@ -134,13 +134,13 @@ func MirrorLineHorizontally(line Line, x float64) Line {
 	return out
 }
 
-func tangentAt(l Line, dist float64) *Tangent {
+func TangentAt(l Line, dist float64) *Tangent {
 	sl, acc := straightLineOnLine(l, dist)
 	return sl.TangentAt(dist - acc)
 }
 
 func TangentAtLineStart(l Line) *Tangent {
-	t := tangentAt(l, 0.0)
+	t := TangentAt(l, 0.0)
 	return &Tangent{
 		Origin: t.Origin,
 		Direction: t.Direction.Opposite(),
@@ -150,7 +150,7 @@ func TangentAtLineStart(l Line) *Tangent {
 func TangentAtLineEnd(l Line) *Tangent {
 	endEquiv := l.Length() - 0.001
 
-	t := tangentAt(l, endEquiv)
+	t := TangentAt(l, endEquiv)
 
 	sl, _ := straightLineOnLine(l, endEquiv)
 
