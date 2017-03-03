@@ -1,11 +1,12 @@
-package pieces
+package rendering
 
 import (
 	"github.com/tailored-style/pattern-generator/geometry"
+	"github.com/tailored-style/pattern-generator/pieces"
 )
 
 type OpenOnFold struct {
-	Piece
+	pieces.Piece
 }
 
 func (p OpenOnFold) x() float64 {
@@ -49,12 +50,4 @@ func (p *OpenOnFold) NotationLayer() *geometry.Block {
 	layer.AddBlock(mirrored)
 
 	return layer
-}
-
-func (p *OpenOnFold) OnFold() bool {
-	return false
-}
-
-func (p *OpenOnFold) Details() *Details {
-	return p.Piece.Details()
 }

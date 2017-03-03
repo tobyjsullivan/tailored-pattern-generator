@@ -11,6 +11,7 @@ type Piece interface {
 	CutLayer() *geometry.Block
 	NotationLayer() *geometry.Block
 	OnFold() bool
+	Mirrored() bool
 	Details() *Details
 }
 

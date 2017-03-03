@@ -31,10 +31,15 @@ func (m *Marker) drawPieces(d drawing.Drawing) {
 
 	for _, p := range originals {
 		if p.OnFold() {
-			p = &pieces.OpenOnFold{Piece: p}
+			p = &OpenOnFold{Piece: p}
+		}
+
+		if p.Mirrored() {
+			p = &MirroredPiece{Piece: p}
 		}
 
 		openedPieces = append(openedPieces, p)
+
 	}
 
 	// Compute nesting layout
@@ -68,16 +73,6 @@ func drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY float64) erro
 	}
 
 	err := DrawBlock(d, p.CutLayer(), pieceOffset)
-	if err != nil {
-		return err
-	}
-
-	err = DrawBlock(d, p.StitchLayer(), pieceOffset)
-	if err != nil {
-		return err
-	}
-
-	err = DrawBlock(d, p.NotationLayer(), pieceOffset)
 	if err != nil {
 		return err
 	}
