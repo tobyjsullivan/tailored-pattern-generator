@@ -7,6 +7,8 @@ import (
 	"github.com/tailored-style/pattern-generator/drawing"
 	"github.com/tailored-style/pattern-generator/nesting"
 	"math"
+	"fmt"
+	"reflect"
 )
 
 const (
@@ -25,6 +27,10 @@ func (m *Marker) SavePDF(filepath string) error {
 	// Get height of all layouts
 	bottom := 0.0
 	for _, p := range placements {
+		if p.Position == nil {
+			panic(fmt.Sprintf("Failed to place a piece! %v", reflect.ValueOf(p.Piece)))
+		}
+
 		itemTop := p.Position.Y
 		itemBottom := pieces.BoundingBox(p.Piece).Height() + itemTop
 

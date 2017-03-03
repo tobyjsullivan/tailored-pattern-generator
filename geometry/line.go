@@ -140,7 +140,11 @@ func tangentAt(l Line, dist float64) *Tangent {
 }
 
 func TangentAtLineStart(l Line) *Tangent {
-	return tangentAt(l, 0.0)
+	t := tangentAt(l, 0.0)
+	return &Tangent{
+		Origin: t.Origin,
+		Direction: t.Direction.Opposite(),
+	}
 }
 
 func TangentAtLineEnd(l Line) *Tangent {

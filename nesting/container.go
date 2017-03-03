@@ -110,6 +110,7 @@ func (c *Container) Pack(packingList map[int]*Rectangle) map[int]*geometry.Point
 		row, col, found := grid.FindSpace(itemWidth, itemHeight)
 
 		if !found {
+			fmt.Printf("Couldn't find any space for R: %v\n", item.rect)
 			continue
 		}
 
