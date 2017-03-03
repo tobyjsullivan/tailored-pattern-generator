@@ -6,6 +6,7 @@ import (
 	"github.com/tailored-style/pattern-generator/geometry"
 	"github.com/tailored-style/pattern-generator/drawing"
 	"github.com/tailored-style/pattern-generator/nesting"
+	"math"
 )
 
 const (
@@ -18,14 +19,34 @@ type Marker struct {
 }
 
 func (m *Marker) SavePDF(filepath string) error {
-	drawing := drawing.NewPDF(MARKER_PAGE_WIDTH)
+	width := MARKER_PAGE_WIDTH - (2.0 * drawing.PDF_PAGE_MARGIN)
+	placements := m.layoutPieces(width)
 
-	m.drawPieces(drawing)
+	// Get height of all layouts
+	bottom := 0.0
+	for _, p := range placements {
+		itemTop := p.Position.Y
+		itemBottom := pieces.BoundingBox(p.Piece).Height() + itemTop
+
+		if itemBottom > bottom {
+			bottom = itemBottom
+		}
+	}
+
+	// Create PDF with height
+	pageHeight := math.Abs(bottom) + (2.0 * drawing.PDF_PAGE_MARGIN)
+	drawing := drawing.NewPDF(MARKER_PAGE_WIDTH, pageHeight)
+	m.drawPieces(drawing, placements)
 
 	return drawing.SaveAs(filepath)
 }
 
-func (m *Marker) drawPieces(d drawing.Drawing) {
+type piecePlacement struct {
+	pieces.Piece
+	Position *geometry.Point
+}
+
+func (m *Marker) openPieces() []pieces.Piece {
 	originals := m.Style.Pieces()
 	openedPieces := make([]pieces.Piece, 0, len(originals))
 
@@ -42,30 +63,50 @@ func (m *Marker) drawPieces(d drawing.Drawing) {
 
 	}
 
+	return openedPieces
+}
+
+func (m *Marker) layoutPieces(width float64) []*piecePlacement {
+	openedPieces := m.openPieces()
+
 	// Compute nesting layout
 	items := make(map[int]*nesting.Rectangle)
 	for i, p := range openedPieces {
-		bbox := pieceBoundingBox(p)
+		bbox := pieces.BoundingBox(p)
 		items[i] = &nesting.Rectangle{
 			Width: bbox.Width(),
 			Height: bbox.Height(),
 		}
 	}
 	cont := &nesting.Container{
-		Width: d.DrawableWidth(),
+		Width: width,
 		Height: MARKER_PAGE_MAX_HEIGHT,
 	}
 	placements := cont.Pack(items)
 
-	// Draw each piece
+	// Copy all pieces into output slice
+	out := make([]*piecePlacement, len(openedPieces))
 	for i, p := range openedPieces {
 		pos := placements[i]
-		drawPiece(d, p, pos.X, -pos.Y)
+		out[i] = &piecePlacement{
+			Piece: p,
+			Position: pos,
+		}
+	}
+
+	return out
+}
+
+func (m *Marker) drawPieces(d drawing.Drawing, placements []*piecePlacement) {
+	// Draw each piece
+	for _, placement := range placements {
+		pos := placement.Position
+		drawPiece(d, placement.Piece, pos.X, -pos.Y)
 	}
 }
 
 func drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY float64) error {
-	bbox := pieceBoundingBox(p)
+	bbox := pieces.BoundingBox(p)
 
 	pieceOffset := &geometry.Point{
 		X: cornerX - bbox.Left,

@@ -58,3 +58,11 @@ func Notch(l geometry.Line, dist float64) geometry.Line {
 		End: e,
 	}
 }
+
+func BoundingBox(p Piece) *geometry.BoundingBox {
+	return geometry.CollectiveBoundingBox(
+		p.CutLayer(),
+		p.StitchLayer(),
+		p.NotationLayer(),
+	)
+}

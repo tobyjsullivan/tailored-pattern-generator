@@ -21,6 +21,7 @@ const (
 
 	PATTERN_PIECE_MARGIN = 1.0
 	PATTERN_PAGE_WIDTH = 91.44 // 36"
+	PATTERN_PAGE_HEIGHT = 182.88 // 72 inches
 )
 
 type Pattern struct {
@@ -38,7 +39,7 @@ func (pf *Pattern) SaveDXF(filepath string) error {
 }
 
 func (pf *Pattern) SavePDF(filepath string) error {
-	pdf := drawing.NewPDF(PATTERN_PAGE_WIDTH)
+	pdf := drawing.NewPDF(PATTERN_PAGE_WIDTH, PATTERN_PAGE_HEIGHT)
 	err := pf.DrawPattern(pdf, pf.Style)
 	if err != nil {
 		return err
@@ -139,22 +140,19 @@ func (pf *Pattern) DrawPattern(d drawing.Drawing, s styles.Style) error {
 		fmt.Printf("Drawing %v\n", p)
 		pf.drawPiece(d, p, cornerX, cornerY)
 
-		bbox := pieceBoundingBox(p)
+		bbox := pieces.BoundingBox(p)
 		rowMaxHeight := bbox.Height()
 		cornerX += bbox.Width() + PATTERN_PIECE_MARGIN
 
 
 		for ; cornerX < drawableWidth && j < len(piecesOffFold); j++ {
 			p = piecesOffFold[j]
-			fmt.Printf("Want to draw %v at (%.2f, %.2f)\n", p, cornerX, cornerY)
-			bbox = pieceBoundingBox(p)
+			bbox = pieces.BoundingBox(p)
 
 			if cornerX + bbox.Width() > drawableWidth {
-				fmt.Printf("Piece %v is too big for here\n", p)
 				break
 			}
 
-			fmt.Printf("Drawing %v\n", p)
 			pf.drawPiece(d, p, cornerX, cornerY)
 
 			cornerX += bbox.Width() + PATTERN_PIECE_MARGIN
@@ -174,7 +172,7 @@ func (pf *Pattern) DrawPattern(d drawing.Drawing, s styles.Style) error {
 		p := piecesOffFold[j]
 		fmt.Printf("Want to draw %v at (%.2f, %.2f)\n", p, cornerX, cornerY)
 
-		bbox := pieceBoundingBox(p)
+		bbox := pieces.BoundingBox(p)
 		if cornerX + bbox.Width() > drawableWidth {
 			fmt.Println("Piece won't fit on this line")
 			cornerX = 0.0
@@ -210,7 +208,7 @@ func (pf *Pattern) drawMultilineText(d drawing.Drawing, lines []string, pos *geo
 }
 
 func (pf *Pattern) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY float64) error {
-	bbox := pieceBoundingBox(p)
+	bbox := pieces.BoundingBox(p)
 
 	pieceOffset := &geometry.Point{
 		X: cornerX - bbox.Left,

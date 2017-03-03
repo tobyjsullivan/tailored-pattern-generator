@@ -7,14 +7,15 @@ import (
 
 const (
 	PIECE_PAGE_WIDTH = 91.44 // 36"
+	PIECE_PAGE_HEIGHT = 91.44 // 36"
 )
 
-type Piece struct {
+type PieceRender struct {
 	pieces.Piece
 }
 
-func (p *Piece) SavePDF(filepath string) error {
-	pdf := drawing.NewPDF(PIECE_PAGE_WIDTH)
+func (p *PieceRender) SavePDF(filepath string) error {
+	pdf := drawing.NewPDF(PIECE_PAGE_WIDTH, PIECE_PAGE_HEIGHT)
 	err := drawPiece(pdf, p.Piece, 0.0, 0.0)
 	if err != nil {
 		return err

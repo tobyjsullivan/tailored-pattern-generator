@@ -8,9 +8,6 @@ import (
 const (
 	PDF_PAGE_MARGIN = 1.0
 	PDF_PAGE_UNIT = "cm"
-	//PDF_PAGE_HEIGHT = 254.0 // 100 inches
-	//PDF_PAGE_HEIGHT = 228.6 // 90 inches
-	PDF_PAGE_HEIGHT = 182.88 // 72 inches
 )
 
 type pdfDrawing struct {
@@ -20,10 +17,10 @@ type pdfDrawing struct {
 	layerActive bool
 }
 
-func NewPDF(widthCm float64) Drawing {
+func NewPDF(widthCm float64, heightCm float64) Drawing {
 	pdf := gofpdf.NewCustom(&gofpdf.InitType{
 		UnitStr: PDF_PAGE_UNIT,
-		Size: gofpdf.SizeType{Wd: widthCm, Ht: PDF_PAGE_HEIGHT},
+		Size: gofpdf.SizeType{Wd: widthCm, Ht: heightCm},
 	})
 	pdf.SetMargins(PDF_PAGE_MARGIN, PDF_PAGE_MARGIN, PDF_PAGE_MARGIN)
 	pdf.SetFont("Courier", "", 36.0)
