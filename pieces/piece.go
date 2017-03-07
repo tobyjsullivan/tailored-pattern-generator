@@ -7,9 +7,9 @@ import (
 const SEAM_ALLOWANCE = 1.0
 
 type Piece interface {
-	StitchLayer() *geometry.Block
-	CutLayer() *geometry.Block
-	NotationLayer() *geometry.Block
+	Stitch() *geometry.Block
+	InnerCut() *geometry.Block
+	Ink() *geometry.Block
 	OnFold() bool
 	Mirrored() bool
 	Details() *Details
@@ -71,8 +71,8 @@ func Notch(stitch geometry.Line, dist float64, opp bool) geometry.Line {
 
 func BoundingBox(p Piece) *geometry.BoundingBox {
 	return geometry.CollectiveBoundingBox(
-		p.CutLayer(),
-		p.StitchLayer(),
-		p.NotationLayer(),
+		p.InnerCut(),
+		p.Stitch(),
+		p.Ink(),
 	)
 }

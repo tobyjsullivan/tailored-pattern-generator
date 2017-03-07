@@ -121,7 +121,7 @@ func drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY float64) erro
 		Y: cornerY - bbox.Top,
 	}
 
-	err := DrawBlock(d, p.CutLayer(), pieceOffset)
+	err := DrawBlock(d, p.InnerCut(), pieceOffset)
 	if err != nil {
 		return err
 	}

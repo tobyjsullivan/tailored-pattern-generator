@@ -13,15 +13,15 @@ const MIRRORED_PIECE_MARGIN = 1.0
 
 func (p MirroredPiece) x() float64 {
 	bbox := geometry.CollectiveBoundingBox(
-		p.Piece.CutLayer(),
-		p.Piece.StitchLayer(),
-		p.Piece.NotationLayer(),
+		p.Piece.InnerCut(),
+		p.Piece.Stitch(),
+		p.Piece.Ink(),
 	)
 	return bbox.Right + (MIRRORED_PIECE_MARGIN / 2.0)
 }
 
 func (p *MirroredPiece) StitchLayer() *geometry.Block {
-	layer := p.Piece.StitchLayer()
+	layer := p.Piece.Stitch()
 
 	layer.AddBlock(
 		layer.MirrorHorizontally(p.x()),
@@ -31,7 +31,7 @@ func (p *MirroredPiece) StitchLayer() *geometry.Block {
 }
 
 func (p *MirroredPiece) CutLayer() *geometry.Block {
-	layer := p.Piece.CutLayer()
+	layer := p.Piece.InnerCut()
 
 	layer.AddBlock(
 		layer.MirrorHorizontally(p.x()),
@@ -41,7 +41,7 @@ func (p *MirroredPiece) CutLayer() *geometry.Block {
 }
 
 func (p *MirroredPiece) NotationLayer() *geometry.Block {
-	layer := p.Piece.NotationLayer()
+	layer := p.Piece.Ink()
 
 	layer.AddBlock(
 		layer.MirrorHorizontally(p.x()),

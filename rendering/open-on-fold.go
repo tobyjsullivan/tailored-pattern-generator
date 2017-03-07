@@ -10,11 +10,11 @@ type OpenOnFold struct {
 }
 
 func (p OpenOnFold) x() float64 {
-	return p.Piece.CutLayer().BoundingBox().Left
+	return p.Piece.InnerCut().BoundingBox().Left
 }
 
 func (p *OpenOnFold) StitchLayer() *geometry.Block {
-	layer := p.Piece.StitchLayer()
+	layer := p.Piece.Stitch()
 
 	if !p.Piece.OnFold() {
 		return layer
@@ -27,7 +27,7 @@ func (p *OpenOnFold) StitchLayer() *geometry.Block {
 }
 
 func (p *OpenOnFold) CutLayer() *geometry.Block {
-	layer := p.Piece.CutLayer()
+	layer := p.Piece.InnerCut()
 
 	if !p.Piece.OnFold() {
 		return layer
@@ -40,7 +40,7 @@ func (p *OpenOnFold) CutLayer() *geometry.Block {
 }
 
 func (p *OpenOnFold) NotationLayer() *geometry.Block {
-	layer := p.Piece.NotationLayer()
+	layer := p.Piece.Ink()
 
 	if !p.Piece.OnFold() {
 		return layer

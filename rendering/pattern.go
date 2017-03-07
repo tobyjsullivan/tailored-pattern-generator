@@ -220,7 +220,7 @@ func (pf *Pattern) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY
 		return err
 	}
 
-	err = pf.DrawBlock(d, p.CutLayer(), pieceOffset)
+	err = pf.DrawBlock(d, p.InnerCut(), pieceOffset)
 	if err != nil {
 		return err
 	}
@@ -230,7 +230,7 @@ func (pf *Pattern) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY
 		return err
 	}
 
-	err = pf.DrawBlock(d, p.StitchLayer(), pieceOffset)
+	err = pf.DrawBlock(d, p.Stitch(), pieceOffset)
 	if err != nil {
 		return err
 	}
@@ -240,7 +240,7 @@ func (pf *Pattern) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY
 		return err
 	}
 
-	err = pf.DrawBlock(d, p.NotationLayer(), pieceOffset)
+	err = pf.DrawBlock(d, p.Ink(), pieceOffset)
 	if err != nil {
 		return err
 	}
