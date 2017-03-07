@@ -65,7 +65,9 @@ func (m *Marker) openPieces() []pieces.Piece {
 			p = &MirroredPiece{Piece: p}
 		}
 
-		openedPieces = append(openedPieces, p)
+		for i := 0; i < p.CutCount(); i++ {
+			openedPieces = append(openedPieces, p)
+		}
 
 	}
 

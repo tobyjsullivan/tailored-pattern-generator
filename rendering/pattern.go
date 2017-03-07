@@ -248,10 +248,22 @@ func (pf *Pattern) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY
 	// Stamp piece details
 	pieceCorner := &geometry.Point{X: cornerX, Y: cornerY}
 	pieceCentre := pieceCorner.MidpointTo(pieceCorner.Move(bbox.Width(), -bbox.Height()))
+	count := p.CutCount()
+	if p.Mirrored() {
+		count *= 2
+	}
+	cutInstructions := fmt.Sprintf("Cut %d", count)
+	if p.Mirrored() {
+		cutInstructions += " mirrored"
+	}
+	if p.OnFold() {
+		cutInstructions += " on fold"
+	}
 	details := p.Details()
 	lines := []string {
 		fmt.Sprintf("PN: %d", details.PieceNumber),
 		details.Description,
+		cutInstructions,
 	}
 	err = pf.drawMultilineText(d, lines, pieceCentre)
 

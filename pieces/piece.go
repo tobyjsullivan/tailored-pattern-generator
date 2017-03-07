@@ -13,6 +13,7 @@ type Piece interface {
 	OnFold() bool
 	Mirrored() bool
 	Details() *Details
+	CutCount() int
 }
 
 func AddSeamAllowance(l geometry.Line, opposite bool) geometry.Line {
