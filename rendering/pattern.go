@@ -10,6 +10,8 @@ import (
 	"github.com/tailored-style/pattern-generator/drawing"
 	"time"
 	"math"
+	"github.com/tailored-style/pattern-generator/nesting"
+	"reflect"
 )
 
 const (
@@ -22,6 +24,7 @@ const (
 	PATTERN_PIECE_MARGIN = 1.0
 	PATTERN_PAGE_WIDTH = 91.44 // 36"
 	PATTERN_PAGE_HEIGHT = 182.88 // 72 inches
+	PATTERN_PAGE_MAX_HEIGHT = 1000.0 // 10 metres
 )
 
 type Pattern struct {
@@ -29,8 +32,10 @@ type Pattern struct {
 }
 
 func (pf *Pattern) SaveDXF(filepath string) error {
+	placements := pf.layoutPieces(pf.Style.Pieces(), PATTERN_PAGE_WIDTH - (2.0 * drawing.PDF_PAGE_MARGIN))
+
 	dxf := drawing.NewDXF(PATTERN_PAGE_WIDTH)
-	err := pf.DrawPattern(dxf, pf.Style)
+	err := pf.DrawPattern(dxf, pf.Style, placements, 0.0)
 	if err != nil {
 		return err
 	}
@@ -39,8 +44,29 @@ func (pf *Pattern) SaveDXF(filepath string) error {
 }
 
 func (pf *Pattern) SavePDF(filepath string) error {
-	pdf := drawing.NewPDF(PATTERN_PAGE_WIDTH, PATTERN_PAGE_HEIGHT)
-	err := pf.DrawPattern(pdf, pf.Style)
+	placements := pf.layoutPieces(pf.Style.Pieces(), PATTERN_PAGE_WIDTH - (2.0 * drawing.PDF_PAGE_MARGIN))
+
+	// Get height of all layouts
+	bottom := 0.0
+	for _, p := range placements {
+		if p.Position == nil {
+			panic(fmt.Sprintf("Failed to place a piece! %v", reflect.ValueOf(p.Piece)))
+		}
+
+		itemTop := p.Position.Y
+		itemBottom := pieces.BoundingBox(p.Piece).Height() + itemTop
+
+		if itemBottom > bottom {
+			bottom = itemBottom
+		}
+	}
+
+	estHeaderSize := 15.0
+	pdf := drawing.NewPDF(PATTERN_PAGE_WIDTH, math.Abs(bottom) + estHeaderSize)
+
+	var err error
+	h, err := pf.drawHeaderInfo(pdf, pf.Style)
+	err = pf.DrawPattern(pdf, pf.Style, placements, h)
 	if err != nil {
 		return err
 	}
@@ -65,14 +91,12 @@ func (pf *Pattern) SetLayer(d drawing.Drawing, layer string) error {
 	return err
 }
 
-func (pf *Pattern) DrawPattern(d drawing.Drawing, s styles.Style) error {
-	var err error
-
+func (pf *Pattern) drawHeaderInfo(d drawing.Drawing, s styles.Style) (height float64, err error) {
 	err = pf.SetLayer(d, LAYER_CUT)
 	if err != nil {
-		return err
+		return
 	}
-	startingY := 0.0
+	height = 0.0
 	details := s.Details()
 	if details != nil {
 		detailText := []string{
@@ -87,10 +111,10 @@ func (pf *Pattern) DrawPattern(d drawing.Drawing, s styles.Style) error {
 		}
 		err = pf.drawMultilineText(d, detailText, detailPosition)
 		if err != nil {
-			return err
+			return
 		}
 
-		startingY = -(float64(len(detailText)) * LINE_SPACING + 2.0)
+		height = -(float64(len(detailText)) * LINE_SPACING + 2.0)
 
 		if details.Measurements != nil {
 			measurementText := []string{
@@ -108,89 +132,55 @@ func (pf *Pattern) DrawPattern(d drawing.Drawing, s styles.Style) error {
 			}
 			err = pf.drawMultilineText(d, measurementText, measurementPosition)
 			if err != nil {
-				return err
+				return
 			}
 
-			startingY = math.Min(startingY, -(float64(len(measurementText)) * LINE_SPACING + 2.0))
-		}
-
-
-	}
-
-	// Pieces on fold should be most left.
-	piecesOnFold := []pieces.Piece{}
-	piecesOffFold := []pieces.Piece{}
-	for _, p := range s.Pieces() {
-		if p.OnFold() {
-			piecesOnFold = append(piecesOnFold, p)
-		} else {
-			piecesOffFold = append(piecesOffFold, p)
+			height = math.Min(height, -(float64(len(measurementText)) * LINE_SPACING + 2.0))
 		}
 	}
 
-	// Draw each piece
-	cornerX, cornerY := 0.0, startingY
-	drawableWidth := d.DrawableWidth()
-	j := 0
-	for i := 0; i < len(piecesOnFold); i++ {
-		// Draw first piece on fold
-		p := piecesOnFold[i]
-		fmt.Printf("Want to draw %v\n", p)
+	return
+}
 
-		fmt.Printf("Drawing %v\n", p)
-		pf.drawPiece(d, p, cornerX, cornerY)
-
-		bbox := pieces.BoundingBox(p)
-		rowMaxHeight := bbox.Height()
-		cornerX += bbox.Width() + PATTERN_PIECE_MARGIN
-
-
-		for ; cornerX < drawableWidth && j < len(piecesOffFold); j++ {
-			p = piecesOffFold[j]
-			bbox = pieces.BoundingBox(p)
-
-			if cornerX + bbox.Width() > drawableWidth {
-				break
-			}
-
-			pf.drawPiece(d, p, cornerX, cornerY)
-
-			cornerX += bbox.Width() + PATTERN_PIECE_MARGIN
-			height := bbox.Height()
-			if height > rowMaxHeight {
-				rowMaxHeight = height
-			}
-		}
-
-		cornerX = 0.0
-		cornerY -= rowMaxHeight + PATTERN_PIECE_MARGIN
-	}
-
-	fmt.Println("Done drawing all pieces on fold")
-	rowMaxHeight := 0.0
-	for ; cornerX < drawableWidth && j < len(piecesOffFold); j++ {
-		p := piecesOffFold[j]
-		fmt.Printf("Want to draw %v at (%.2f, %.2f)\n", p, cornerX, cornerY)
-
-		bbox := pieces.BoundingBox(p)
-		if cornerX + bbox.Width() > drawableWidth {
-			fmt.Println("Piece won't fit on this line")
-			cornerX = 0.0
-			cornerY -= rowMaxHeight + PATTERN_PIECE_MARGIN
-			rowMaxHeight = 0.0
-		}
-
-		fmt.Printf("Drawing %v\n", p)
-		pf.drawPiece(d, p, cornerX, cornerY)
-
-		cornerX += bbox.Width() + PATTERN_PIECE_MARGIN
-		height := bbox.Height()
-		if height > rowMaxHeight {
-			rowMaxHeight = height
+func (pf *Pattern) DrawPattern(d drawing.Drawing, s styles.Style, placements []*piecePlacement, offsetY float64) error {
+	for _, placement := range placements {
+		pos := placement.Position
+		err := pf.drawPiece(d, placement.Piece, pos.X, offsetY - pos.Y)
+		if err != nil {
+			return err
 		}
 	}
 
 	return nil
+}
+
+func (pf *Pattern) layoutPieces(pcs []pieces.Piece, width float64) []*piecePlacement {
+	// Compute nesting layout
+	items := make(map[int]*nesting.Rectangle)
+	for i, p := range pcs {
+		bbox := pieces.BoundingBox(p)
+		items[i] = &nesting.Rectangle{
+			Width: bbox.Width(),
+			Height: bbox.Height(),
+		}
+	}
+	cont := &nesting.Container{
+		Width: width,
+		Height: MARKER_PAGE_MAX_HEIGHT,
+	}
+	placements := cont.Pack(items)
+
+	// Copy all pieces into output slice
+	out := make([]*piecePlacement, len(pcs))
+	for i, p := range pcs {
+		pos := placements[i]
+		out[i] = &piecePlacement{
+			Piece: p,
+			Position: pos,
+		}
+	}
+
+	return out
 }
 
 func (pf *Pattern) drawMultilineText(d drawing.Drawing, lines []string, pos *geometry.Point) error {
@@ -235,6 +225,12 @@ func (pf *Pattern) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY
 		return err
 	}
 
+	ink := p.Ink().Move(offsetX, offsetY)
+	err = pf.DrawBlock(d, ink)
+	if err != nil {
+		return err
+	}
+
 	stitch := p.Stitch().Move(offsetX, offsetY)
 	err = pf.DrawBlock(d, stitch)
 	if err != nil {
@@ -246,8 +242,8 @@ func (pf *Pattern) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY
 		return err
 	}
 
-	ink := p.Ink().Move(offsetX, offsetY)
-	err = pf.DrawBlock(d, ink)
+	ref := p.Reference().Move(offsetX, offsetY)
+	err = pf.DrawBlock(d, ref)
 	if err != nil {
 		return err
 	}

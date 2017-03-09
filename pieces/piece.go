@@ -11,6 +11,7 @@ type Piece interface {
 	OuterCut() *geometry.Polyline
 	InnerCut() *geometry.Block
 	Ink() *geometry.Block
+	Reference() *geometry.Block
 	OnFold() bool
 	Mirrored() bool
 	Details() *Details

@@ -124,6 +124,10 @@ func (m *Marker) drawPieces(d drawing.Drawing, placements []*piecePlacement) {
 func drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY float64) error {
 	bbox := pieces.BoundingBox(p)
 
+	if bbox == nil {
+		return nil
+	}
+
 	offsetX := cornerX - bbox.Left
 	offsetY := cornerY - bbox.Top
 
@@ -133,6 +137,12 @@ func drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY float64) erro
 
 	inner := p.InnerCut().Move(offsetX, offsetY)
 	err = DrawBlock(d, inner)
+	if err != nil {
+		return err
+	}
+
+	ink := p.Ink().Move(offsetX, offsetY)
+	err = DrawBlock(d, ink)
 	if err != nil {
 		return err
 	}

@@ -80,3 +80,15 @@ func (p *Polyline) Move(x, y float64) *Polyline {
 		points: points,
 	}
 }
+
+func (p *Polyline) MirrorHorizontally(x float64) *Polyline {
+	points := make([]*Point, len(p.points))
+
+	for i := range points {
+		points[i] = p.points[i].MirrorHorizontally(x)
+	}
+
+	return &Polyline{
+		points: points,
+	}
+}
