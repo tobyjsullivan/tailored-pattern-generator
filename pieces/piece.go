@@ -72,6 +72,7 @@ func Notch(stitch geometry.Line, dist float64, opp bool) geometry.Line {
 
 func BoundingBox(p Piece) *geometry.BoundingBox {
 	return geometry.CollectiveBoundingBox(
+		p.OuterCut(),
 		p.InnerCut(),
 		p.Stitch(),
 		p.Ink(),

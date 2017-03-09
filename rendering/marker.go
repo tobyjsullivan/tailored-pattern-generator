@@ -13,6 +13,7 @@ import (
 
 const (
 	MARKER_PAGE_WIDTH = 152.4 // 60 inches
+	//MARKER_PAGE_WIDTH = 91.44 // 36 inches
 	MARKER_PAGE_MAX_HEIGHT = 1000.0 // 10 metres
 )
 
@@ -61,12 +62,19 @@ func (m *Marker) openPieces() []pieces.Piece {
 			p = &OpenOnFold{Piece: p}
 		}
 
+		newPieces := []pieces.Piece{
+			p,
+		}
 		if p.Mirrored() {
-			p = &MirroredPiece{Piece: p}
+			newPieces = append(newPieces,
+				&MirroredPiece{Piece: p},
+			)
 		}
 
 		for i := 0; i < p.CutCount(); i++ {
-			openedPieces = append(openedPieces, p)
+			for _, ps := range newPieces {
+				openedPieces = append(openedPieces, ps)
+			}
 		}
 
 	}

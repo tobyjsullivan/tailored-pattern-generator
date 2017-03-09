@@ -86,13 +86,12 @@ func (c *Container) Pack(packingList map[int]*Rectangle) map[int]*geometry.Point
 	sort.Sort(bySize(items))
 
 	// Create a grid covering the container area
-	squaresAcross := int(math.Floor(c.Width / 2))
+	squaresAcross := int(math.Floor(c.Width / 2.0))
 	squareSize := c.Width / float64(squaresAcross)
 	squaresHigh := int(math.Floor(c.Height / squareSize))
 
 	fmt.Printf("Square size is %.2f\n", squareSize)
 	fmt.Printf("Grid size is %dx%d\n", squaresAcross, squaresHigh)
-
 
 	a := make([][]bool, squaresHigh)
 	for i := range a {

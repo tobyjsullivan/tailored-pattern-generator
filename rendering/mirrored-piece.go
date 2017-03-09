@@ -22,32 +22,35 @@ func (p MirroredPiece) x() float64 {
 
 func (p *MirroredPiece) Stitch() *geometry.Block {
 	layer := p.Piece.Stitch()
+	out := &geometry.Block{}
 
-	layer.AddBlock(
+	out.AddBlock(
 		layer.MirrorHorizontally(p.x()),
 	)
 
-	return layer
+	return out
 }
 
 func (p *MirroredPiece) InnerCut() *geometry.Block {
 	layer := p.Piece.InnerCut()
+	out := &geometry.Block{}
 
-	layer.AddBlock(
+	out.AddBlock(
 		layer.MirrorHorizontally(p.x()),
 	)
 
-	return layer
+	return out
 }
 
 func (p *MirroredPiece) Ink() *geometry.Block {
 	layer := p.Piece.Ink()
+	out := &geometry.Block{}
 
-	layer.AddBlock(
+	out.AddBlock(
 		layer.MirrorHorizontally(p.x()),
 	)
 
-	return layer
+	return out
 }
 
 func (p *MirroredPiece) OuterCut() *geometry.Polyline {
@@ -55,7 +58,6 @@ func (p *MirroredPiece) OuterCut() *geometry.Polyline {
 	orig := p.Piece.OuterCut()
 
 	out.AddLine(
-		orig,
 		geometry.MirrorLineHorizontally(orig, p.x()),
 	)
 
