@@ -13,7 +13,7 @@ func (p OpenOnFold) x() float64 {
 	return p.Piece.InnerCut().BoundingBox().Left
 }
 
-func (p *OpenOnFold) StitchLayer() *geometry.Block {
+func (p *OpenOnFold) Stitch() *geometry.Block {
 	layer := p.Piece.Stitch()
 
 	if !p.Piece.OnFold() {
@@ -26,7 +26,7 @@ func (p *OpenOnFold) StitchLayer() *geometry.Block {
 	return layer
 }
 
-func (p *OpenOnFold) CutLayer() *geometry.Block {
+func (p *OpenOnFold) InnerCut() *geometry.Block {
 	layer := p.Piece.InnerCut()
 
 	if !p.Piece.OnFold() {
@@ -39,7 +39,7 @@ func (p *OpenOnFold) CutLayer() *geometry.Block {
 	return layer
 }
 
-func (p *OpenOnFold) NotationLayer() *geometry.Block {
+func (p *OpenOnFold) Ink() *geometry.Block {
 	layer := p.Piece.Ink()
 
 	if !p.Piece.OnFold() {
@@ -50,4 +50,16 @@ func (p *OpenOnFold) NotationLayer() *geometry.Block {
 	layer.AddBlock(mirrored)
 
 	return layer
+}
+
+func (p *OpenOnFold) OuterCut() *geometry.Polyline {
+	out := &geometry.Polyline{}
+	orig := p.Piece.OuterCut()
+
+	out.AddLine(
+		orig,
+		geometry.MirrorLineHorizontally(orig, p.x()),
+	)
+
+	return out
 }

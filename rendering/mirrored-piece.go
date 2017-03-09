@@ -20,7 +20,7 @@ func (p MirroredPiece) x() float64 {
 	return bbox.Right + (MIRRORED_PIECE_MARGIN / 2.0)
 }
 
-func (p *MirroredPiece) StitchLayer() *geometry.Block {
+func (p *MirroredPiece) Stitch() *geometry.Block {
 	layer := p.Piece.Stitch()
 
 	layer.AddBlock(
@@ -30,7 +30,7 @@ func (p *MirroredPiece) StitchLayer() *geometry.Block {
 	return layer
 }
 
-func (p *MirroredPiece) CutLayer() *geometry.Block {
+func (p *MirroredPiece) InnerCut() *geometry.Block {
 	layer := p.Piece.InnerCut()
 
 	layer.AddBlock(
@@ -40,7 +40,7 @@ func (p *MirroredPiece) CutLayer() *geometry.Block {
 	return layer
 }
 
-func (p *MirroredPiece) NotationLayer() *geometry.Block {
+func (p *MirroredPiece) Ink() *geometry.Block {
 	layer := p.Piece.Ink()
 
 	layer.AddBlock(
@@ -48,4 +48,16 @@ func (p *MirroredPiece) NotationLayer() *geometry.Block {
 	)
 
 	return layer
+}
+
+func (p *MirroredPiece) OuterCut() *geometry.Polyline {
+	out := &geometry.Polyline{}
+	orig := p.Piece.OuterCut()
+
+	out.AddLine(
+		orig,
+		geometry.MirrorLineHorizontally(orig, p.x()),
+	)
+
+	return out
 }

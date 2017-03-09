@@ -68,3 +68,15 @@ func (p *Polyline) AddLine(ls ...Line) {
 		p.points = append(p.points, newPoints...)
 	}
 }
+
+func (p *Polyline) Move(x, y float64) *Polyline {
+	points := make([]*Point, len(p.points))
+
+	for i := range points {
+		points[i] = p.points[i].Move(x, y)
+	}
+
+	return &Polyline{
+		points: points,
+	}
+}

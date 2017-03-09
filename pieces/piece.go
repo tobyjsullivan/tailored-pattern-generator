@@ -8,6 +8,7 @@ const SEAM_ALLOWANCE = 1.0
 
 type Piece interface {
 	Stitch() *geometry.Block
+	OuterCut() *geometry.Polyline
 	InnerCut() *geometry.Block
 	Ink() *geometry.Block
 	OnFold() bool

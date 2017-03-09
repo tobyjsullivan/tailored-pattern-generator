@@ -116,12 +116,15 @@ func (m *Marker) drawPieces(d drawing.Drawing, placements []*piecePlacement) {
 func drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY float64) error {
 	bbox := pieces.BoundingBox(p)
 
-	pieceOffset := &geometry.Point{
-		X: cornerX - bbox.Left,
-		Y: cornerY - bbox.Top,
-	}
+	offsetX := cornerX - bbox.Left
+	offsetY := cornerY - bbox.Top
 
-	err := DrawBlock(d, p.InnerCut(), pieceOffset)
+	var err error
+	outer := p.OuterCut().Move(offsetX, offsetY)
+	err = drawPolyline(d, outer)
+
+	inner := p.InnerCut().Move(offsetX, offsetY)
+	err = DrawBlock(d, inner)
 	if err != nil {
 		return err
 	}
@@ -129,33 +132,46 @@ func drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY float64) erro
 	return err
 }
 
-func DrawBlock(d drawing.Drawing, b *geometry.Block, offset *geometry.Point) error {
-	movedBlk := b.Move(offset.X, offset.Y)
-
+func DrawBlock(d drawing.Drawing, b *geometry.Block) error {
 	var err error
-	for _, l := range movedBlk.StraightLines {
+	for _, l := range b.StraightLines {
 		err = drawStraightLine(d, l)
 		if err != nil {
 			return err
 		}
 	}
 
-	for _, p := range movedBlk.Points {
+	for _, p := range b.Points {
 		err = drawPoint(d, p)
 		if err != nil {
 			return err
 		}
 	}
 
-	for _, t := range movedBlk.Text {
+	for _, t := range b.Text {
 		err = drawText(d, t)
 		if err != nil {
 			return err
 		}
 	}
 
-	for _, block := range movedBlk.Blocks {
-		err = DrawBlock(d, block, &geometry.Point{X: 0.0, Y: 0.0})
+	for _, block := range b.Blocks {
+		err = DrawBlock(d, block)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func drawPolyline(d drawing.Drawing, l *geometry.Polyline) error {
+	if l == nil {
+		return nil
+	}
+
+	for _, sl := range l.StraightLines() {
+		err := drawStraightLine(d, sl)
 		if err != nil {
 			return err
 		}

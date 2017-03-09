@@ -204,23 +204,28 @@ func (pf *Pattern) drawMultilineText(d drawing.Drawing, lines []string, pos *geo
 		pos = pos.Move(0, -LINE_SPACING)
 	}
 
-	return pf.DrawBlock(d, detailsBlk, &geometry.Point{})
+	return pf.DrawBlock(d, detailsBlk)
 }
 
 func (pf *Pattern) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY float64) error {
 	bbox := pieces.BoundingBox(p)
 
-	pieceOffset := &geometry.Point{
-		X: cornerX - bbox.Left,
-		Y: cornerY - bbox.Top,
-	}
+	offsetX := cornerX - bbox.Left
+	offsetY := cornerY - bbox.Top
 
 	err := pf.SetLayer(d, LAYER_CUT)
 	if err != nil {
 		return err
 	}
 
-	err = pf.DrawBlock(d, p.InnerCut(), pieceOffset)
+	outer := p.OuterCut().Move(offsetX, offsetY)
+	err = pf.drawPolyline(d, outer)
+	if err != nil {
+		return err
+	}
+
+	inner := p.InnerCut().Move(offsetX, offsetY)
+	err = pf.DrawBlock(d, inner)
 	if err != nil {
 		return err
 	}
@@ -230,7 +235,8 @@ func (pf *Pattern) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY
 		return err
 	}
 
-	err = pf.DrawBlock(d, p.Stitch(), pieceOffset)
+	stitch := p.Stitch().Move(offsetX, offsetY)
+	err = pf.DrawBlock(d, stitch)
 	if err != nil {
 		return err
 	}
@@ -240,7 +246,8 @@ func (pf *Pattern) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY
 		return err
 	}
 
-	err = pf.DrawBlock(d, p.Ink(), pieceOffset)
+	ink := p.Ink().Move(offsetX, offsetY)
+	err = pf.DrawBlock(d, ink)
 	if err != nil {
 		return err
 	}
@@ -270,33 +277,44 @@ func (pf *Pattern) drawPiece(d drawing.Drawing, p pieces.Piece, cornerX, cornerY
 	return err
 }
 
-func (pf *Pattern) DrawBlock(d drawing.Drawing, b *geometry.Block, offset *geometry.Point) error {
-	movedBlk := b.Move(offset.X, offset.Y)
-
+func (pf *Pattern) drawPolyline(d drawing.Drawing, poly *geometry.Polyline) error {
 	var err error
-	for _, l := range movedBlk.StraightLines {
+	for _, l := range poly.StraightLines() {
 		err = d.StraightLine(l.Start, l.End)
 		if err != nil {
 			return err
 		}
 	}
 
-	for _, p := range movedBlk.Points {
+	return nil
+
+}
+
+func (pf *Pattern) DrawBlock(d drawing.Drawing, b *geometry.Block) error {
+	var err error
+	for _, l := range b.StraightLines {
+		err = d.StraightLine(l.Start, l.End)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, p := range b.Points {
 		err = pf.drawPoint(d, p)
 		if err != nil {
 			return err
 		}
 	}
 
-	for _, t := range movedBlk.Text {
+	for _, t := range b.Text {
 		err = d.Text(t.Position, t.Content, t.Rotation)
 		if err != nil {
 			return err
 		}
 	}
 
-	for _, block := range movedBlk.Blocks {
-		err = pf.DrawBlock(d, block, &geometry.Point{X: 0.0, Y: 0.0})
+	for _, block := range b.Blocks {
+		err = pf.DrawBlock(d, block)
 		if err != nil {
 			return err
 		}
