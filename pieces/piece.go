@@ -77,5 +77,6 @@ func BoundingBox(p Piece) *geometry.BoundingBox {
 		p.InnerCut(),
 		p.Stitch(),
 		p.Ink(),
+		p.Reference(),
 	)
 }

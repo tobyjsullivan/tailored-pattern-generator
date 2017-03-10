@@ -53,6 +53,17 @@ func (p *MirroredPiece) Ink() *geometry.Block {
 	return out
 }
 
+func (p *MirroredPiece) Reference() *geometry.Block {
+	layer := p.Piece.Reference()
+	out := &geometry.Block{}
+
+	out.AddBlock(
+		layer.MirrorHorizontally(p.x()),
+	)
+
+	return out
+}
+
 func (p *MirroredPiece) OuterCut() *geometry.Polyline {
 	out := &geometry.Polyline{}
 	orig := p.Piece.OuterCut()
